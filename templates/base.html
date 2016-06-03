@@ -1,0 +1,22 @@
+<html>
+	<head>
+		{% block head %}
+		<title>{% block title %}Skewoo{% endblock %}</title>
+		<meta charset="utf-8" />
+		<meta name="author" content="Skewoo" />
+		<meta name="viewport" content="width=device-width">
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+		<link rel="shortcut icon" href="/static/icon.ico">
+		<link rel="stylesheet" media="all" href="/static/base.css"/>
+		<link rel="stylesheet" media="all" href="https://fonts.googleapis.com/css?family=Open+Sans:400,700"/>
+		{% endblock %}
+	</head>
+	<body>
+		<div id="container">
+			<header>
+				<a href="/index">SensorsHub</a>
+			</header>
+			{% block content %}{% endblock %}
+		</div>
+	</body>
+</html>
