@@ -1,9 +1,62 @@
 {% extends "base.html" %}
 {% block head %}
     {{ super() }}
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.1.4/Chart.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            var sensors = JSON.parse('{{sensors|to_json}}');
+
+            for (i=0; i<sensors.length; ++i) {
+                var sensor = sensors[i];
+                console.log(sensor)
+                createChart("#sensor_"+sensor["id"],sensor["labels"],sensor["values"]);
+            }
+
+            function createChart(id, labels, values) {
+                new Chart($(id), {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Temperature',
+                            data: values,
+                            backgroundColor: [
+                                'rgba(255, 99, 132, 0.2)',
+                                'rgba(54, 162, 235, 0.2)',
+                                'rgba(255, 206, 86, 0.2)',
+                                'rgba(75, 192, 192, 0.2)',
+                                'rgba(153, 102, 255, 0.2)',
+                                'rgba(255, 159, 64, 0.2)'
+                            ],
+                            borderColor: [
+                                'rgba(255,99,132,1)',
+                                'rgba(54, 162, 235, 1)',
+                                'rgba(255, 206, 86, 1)',
+                                'rgba(75, 192, 192, 1)',
+                                'rgba(153, 102, 255, 1)',
+                                'rgba(255, 159, 64, 1)'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            yAxes: [{
+                                ticks: {min: 10.0, max: 30.0}
+                            }]
+                        }
+                    }
+                });
+            }
+        });
+    </script>
 {% endblock %}
 {% block content %}
 <section>
-    Temperatura: {{value}}
+    {% for sensor in sensors %}
+        <h2>Sensor {{sensor['id']}}, currently {{sensor['current']}}C, updated {{sensor['lastupd']}}</h2>
+        <canvas id="sensor_{{sensor['id']}}" width="400" height="150"></canvas>
+    {% endfor %}
 </section>
 {% endblock%}
