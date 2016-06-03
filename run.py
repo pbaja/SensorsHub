@@ -42,6 +42,7 @@ class WebRoot(object):
             # Add all values to sensors
             for sensor in result:
                 date = datetime.datetime.fromtimestamp(sensor[1])
+                print(date)
                 values[sensor[2]]["labels"].append("{}:{}".format(date.hour,date.minute))
                 values[sensor[2]]["values"].append(sensor[3])
 
@@ -53,7 +54,8 @@ class WebRoot(object):
             # All okay, get data
             self.sensors[0] = {"current": float(kwargs["value"]), "lastupd": datetime.datetime.now().strftime("%d.%m.%Y %H:%M")}
             with sqlite3.connect("db.sqlite") as conn:
-                conn.execute("INSERT INTO sensors (date, sensorid, value) VALUES (?,?,?)",[time.time(),0,self.value])
+                conn.execute("INSERT INTO sensors (date, sensorid, value) VALUES (?,?,?)",[time.time(),0,kwargs["value"]])
+                return json.dumps({"success": "Value saved"})
         else:
             return json.dumps({"error": "Wrong token"})
 
