@@ -1,45 +1,69 @@
 html, body {
 	margin: 0;
 	padding: 0;
-	color: #FFF;
+	color: #333;
 }
 
 body {
 	width: 100%;
 	height: 100%;
 
-	display: flex;
-	justify-content: center;
-	align-items: center;
-
 	font-size: 14px;
-	background-color: #333;
+	background-color: #FFF;
 	font-family: 'Open Sans', sans-serif;
+}
+
+/*
+*   Navigation
+*/
+header ul {
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
+}
+header li {
+    display: inline-block;
+}
+header li.header a {
+    font-size: 2em;
+    color: #666;
+    text-decoration: none;
+    vertical-align: middle;
+}
+header li.right {
+    float: right;
+}
+header li.right a {
+    /* Shape */
+    margin-right: 5px;
+    padding: 5px;
+    height: 38px;
+    line-height: 38px;
+
+    /* Text */
+    font-size: 18px;
+    text-align: center;
+    text-decoration: none;
+    font-weight: bold;
+    color: #777;
+    border-bottom: 2px solid #BBB;
+
+}
+header li.right a:hover {
+    transition: all 0.1s;
+    color: #888;
+    border-bottom: 2px solid #0AF;
+}
+header li.current a {
+    border-bottom: 2px solid #0AF;
 }
 
 /*
 *   Main content
 */
-
 #container {
-    flex: 1;
-	max-width: 900px;
-    padding: 10px;
+    padding: 10px 25px;
 }
-
-header {
-	text-align: center;
-}
-header a {
-    margin: 0;
-	padding: 0;
-	font-size: 7vw;
-    font-weight: bold;
-	color: #FFF;
-	cursor: default;
-    text-decoration: none;
-}
-
 section {
     margin-top: 5px;
 }
@@ -49,12 +73,12 @@ section {
 */
 .button {
     /* Shape */
-    display: block;
+    display: inline-block;
     flex-grow: 1;
     margin: 7px 0 0 7px;
     padding: 0 15px;
-    height: 38px;
-    line-height: 38px;
+    height: 22px;
+    line-height: 22px;
 
     /* Text */
     font-size: 15px;
@@ -65,13 +89,11 @@ section {
     /* Background */
     background-color: #0e86ca;
     border: 1px solid #10a1de;
-    box-shadow: 3px 3px 3px rgba(0, 0, 0, 0.3);
 }
 .button:hover {
     transition: all 0.1s;
     background-color: #00aeff;
     border: 1px solid transparent;
-    box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.3);
 }
 
 .violet {

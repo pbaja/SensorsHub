@@ -10,12 +10,31 @@
 		<link rel="stylesheet" media="all" href="/static/base.css"/>
 		<link rel="stylesheet" media="all" href="https://fonts.googleapis.com/css?family=Open+Sans:400,700"/>
 		{% endblock %}
+        <script>
+            $(document).ready(function() {
+                $("header li").each(function(index) {
+                    var href = $(this).children().attr("href").slice(1);
+                    var addr = window.location.href.split("/");
+                    console.log("Href: "+href+" addr: "+addr+" index: "+addr.indexOf(href));
+                    if (addr.indexOf(href)+1) {
+                        $(this).addClass("current");
+                    }
+                });
+            });
+        </script>
 	</head>
 	<body>
 		<div id="container">
 			<header>
-				<a href="/index">SensorsHub</a>
+				<ul>
+					<li class="header"><a href="/index">SensorsHub</a></li>
+					<li class="right"><a href="/about">About</a></li>
+					<li class="right"><a href="/settings">Settings</a></li>
+                    <li class="right"><a href="/log">Log</a></li>
+					<li class="right"><a href="/sensors">Sensors</a></li>
+				</ul>
 			</header>
+            {% if msg %}<div class="title">{{msg}}</div>{% endif %}
 			{% block content %}{% endblock %}
 		</div>
 	</body>

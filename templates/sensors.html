@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block head %}
+    {{ super() }}
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.1.4/Chart.min.js"></script>
+{% endblock %}
+{% block content %}
+<section>
+    <table>
+        <tr><th>Sensor ID</th><th>Description</th><th>Token</th><th>Value</th><th>Battery</th><th>Actions</th></tr>
+        {% for sensor in sensors %}
+            <tr>
+                <form action="/sensors/" method="POST">
+                    <input type="hidden" name="sid" value="{{sensor.sid}}" />
+                    <td>{{sensor.sid}}</td>
+                    <td>{{sensor.description}}</td>
+                    <td>{{sensor.token}}</td>
+                    <td>{{sensor.value}}</td>
+                    <td>{{sensor.battery}}</td>
+                    <td><input type="submit" name="remove" value="Remove" /></td>
+                </form>
+            </tr>
+        {% endfor %}
+        <tr>
+            <form action="/sensors/" method="POST">
+                <td><input type="number" name="sid" placeholder="Sensor ID"></td>
+                <td><input type="text" name="description" placeholder="Description"></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td><input type="submit" name="add" value="Add" /></td>
+            </form>
+        </tr>
+    </table>
+</section>
+{% endblock%}
