@@ -13,10 +13,11 @@ class Reading(object):
 
 class Sensor(object):
 
-    def __init__(self, sid, token, description, value=None, battery=None):
+    def __init__(self, sid, token, title, description, value=None, battery=None):
         self.sid = sid
         self.updated = datetime.now()
         self.token = token
+        self.title = title
         self.description = description
         self.value = value
         self.battery = battery
@@ -39,6 +40,8 @@ class Sensor(object):
             else: updated = 0
             results = conn.execute("SELECT updated, value, battery FROM readings WHERE sid=? AND updated > ?;",[self.sid,updated]).fetchall()
 
+            print(len(results))
+
             readings = []
             for result in results:
                 readings.append(Reading(self.sid, result[0],result[1],result[2]))
@@ -53,7 +56,7 @@ class Sensors(object):
         """Load all sensors from database"""
         with sqlite3.connect("db.sqlite") as conn:
             results = conn.execute("SELECT sid, token, description FROM sensors GROUP BY sid").fetchall()
-            for result in results: self.sensors.append(Sensor(result[0],result[1],result[2]))
+            for result in results: self.sensors.append(Sensor(result[0],result[1],"Default",result[2]))
 
     def add(self, sid, description=None, token=None):
         """Add sensor to database"""

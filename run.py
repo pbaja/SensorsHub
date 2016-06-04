@@ -9,7 +9,7 @@ class Core(object):
         # Create databse
         with sqlite3.connect("db.sqlite") as conn:
             conn.execute(
-                """CREATE TABLE IF NOT EXISTS sensors(sid INTEGER PRIMARY KEY, token TEXT, description TEXT, updated INTEGER)""")
+                """CREATE TABLE IF NOT EXISTS sensors(sid INTEGER PRIMARY KEY, token TEXT, title TEXT, description TEXT, updated INTEGER)""")
             conn.execute(
                 """CREATE TABLE IF NOT EXISTS readings(sid, updated INT, value FLOAT, battery FLOAT)""")
 
@@ -35,15 +35,32 @@ class WebRoot(object):
     def __init__(self, core):
         # Load templates
         self.env = Environment(loader=FileSystemLoader('templates'))
+
         def to_json(value): return json.dumps(value)
         self.env.filters["to_json"] = to_json
+
+        def format_datetime(value, format="%d.%m.%Y %H:%M"): return datetime.datetime.fromtimestamp(value).strftime(format)
+        self.env.filters["strftime"] = format_datetime
 
         # Save core object
         self.core = core
 
     @cherrypy.expose
     def index(self):
-        return self.env.get_template('home.html').render(sensors=self.core.sensors.sensors)
+        sensors = self.core.sensors.sensors
+
+        # Generate chart data
+        data = []
+        for sensor in sensors:
+            entry = {"sid": sensor.sid,"labels": [],"values": []}
+            readings = sensor.get_readings(60*60*24)
+            for reading in readings:
+                entry["labels"].append(datetime.datetime.fromtimestamp(reading.updated).strftime("%H:%M"))
+                entry["values"].append(reading.value)
+
+            data.append(entry)
+
+        return self.env.get_template('home.html').render(sensors=sensors, data=json.dumps(data))
 
     @cherrypy.expose
     def sensors(self, *args, **kwargs):

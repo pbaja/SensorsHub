@@ -15,7 +15,6 @@
                 $("header li").each(function(index) {
                     var href = $(this).children().attr("href").slice(1);
                     var addr = window.location.href.split("/");
-                    console.log("Href: "+href+" addr: "+addr+" index: "+addr.indexOf(href));
                     if (addr.indexOf(href)+1) {
                         $(this).addClass("current");
                     }
