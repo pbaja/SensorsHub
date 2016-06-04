@@ -16,6 +16,9 @@ body {
 /*
 *   Navigation
 */
+header {
+    overflow: hidden;
+}
 header ul {
     margin: 0;
     padding: 0;

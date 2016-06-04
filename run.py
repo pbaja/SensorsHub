@@ -48,17 +48,41 @@ class WebRoot(object):
     @cherrypy.expose
     def index(self):
         sensors = self.core.sensors.sensors
+        data = []
 
         # Generate chart data
-        data = []
         for sensor in sensors:
-            entry = {"sid": sensor.sid,"labels": [],"values": []}
+            # Read all values
+            labels = []
+            values = []
+            voltages = []
             readings = sensor.get_readings(60*60*24)
             for reading in readings:
-                entry["labels"].append(datetime.datetime.fromtimestamp(reading.updated).strftime("%H:%M"))
-                entry["values"].append(reading.value)
+                labels.append(datetime.datetime.fromtimestamp(reading.updated).strftime("%H:%M"))
+                values.append(reading.value)
+                voltages.append(reading.battery)
 
-            data.append(entry)
+            # Create data for chart
+            data.append({
+                "sid": sensor.sid,
+                "data": {
+                    "labels": labels,
+                    "datasets": [
+                        {
+                            "label": "Temperature",
+                            "data": values,
+                            "fill": False,
+                            "borderColor": "#FF9000",
+                        },
+                        {
+                            "label": "Battery",
+                            "data": voltages,
+                            "fill": False,
+                            "borderColor": "#0079C4",
+                        }
+                    ]
+                }
+            });
 
         return self.env.get_template('home.html').render(sensors=sensors, data=json.dumps(data))
 
@@ -66,7 +90,12 @@ class WebRoot(object):
     def sensors(self, *args, **kwargs):
         if "add" in kwargs:
             try:
-                self.core.sensors.add(int(kwargs["sid"]),kwargs["description"])
+                if kwargs["token"] != "":
+                    token = kwargs["token"]
+                else:
+                    token = None
+
+                self.core.sensors.add(int(kwargs["sid"]),kwargs["title"],kwargs["description"],token)
                 return self.env.get_template('sensors.html').render(sensors=self.core.sensors.sensors,msg="Sensor added")
             except sqlite3.IntegrityError:
                 return self.env.get_template('sensors.html').render(sensors=self.core.sensors.sensors,

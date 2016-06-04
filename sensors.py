@@ -55,18 +55,19 @@ class Sensors(object):
     def load(self):
         """Load all sensors from database"""
         with sqlite3.connect("db.sqlite") as conn:
-            results = conn.execute("SELECT sid, token, description FROM sensors GROUP BY sid").fetchall()
-            for result in results: self.sensors.append(Sensor(result[0],result[1],"Default",result[2]))
+            results = conn.execute("SELECT sid, token, title, description FROM sensors GROUP BY sid").fetchall()
+            for result in results: self.sensors.append(Sensor(result[0],result[1],result[2],result[3]))
 
-    def add(self, sid, description=None, token=None):
+    def add(self, sid, title=None, description=None, token=None):
         """Add sensor to database"""
         if token == None: token = ''.join(random.choice(string.ascii_uppercase+string.digits) for _ in range(16))
+        if title == None: description = "Default title"
         if description == None: description = "Default description"
 
         with sqlite3.connect("db.sqlite") as conn:
-            conn.execute("INSERT INTO sensors (sid, token, description, updated) VALUES (?,?,?,?)",
-                                   [sid,token,description,int(time.time())]).fetchall()
-            self.sensors.append(Sensor(sid,token,description))
+            conn.execute("INSERT INTO sensors (sid, token, title, description, updated) VALUES (?,?,?,?,?)",
+                                   [sid,token,title, description,int(time.time())]).fetchall()
+            self.sensors.append(Sensor(sid,token,title,description))
 
     def remove(self,sid):
         sensor = self.get(sid)

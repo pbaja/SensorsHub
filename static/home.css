@@ -1,0 +1,9 @@
+.sensor-container {
+    display: flex;
+    flex-wrap: wrap;
+}
+.sensor-section {
+    flex: 1;
+    min-width: 300px;
+    width: 50%;
+}

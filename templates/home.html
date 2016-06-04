@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% block head %}
     {{ super() }}
+    <link rel="stylesheet" media="all" href="/static/home.css"/>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.1.4/Chart.min.js"></script>
     <script>
@@ -9,41 +10,24 @@
             for (i=0; i<sensors.length; ++i) {
                 var sensor = sensors[i];
                 console.log(sensor);
-                createChart("#sensor_"+sensor["sid"],sensor["labels"],sensor["values"]);
+                createChart("#sensor_"+sensor["sid"],sensor["data"]);
             }
 
-            function createChart(id, labels, values) {
+            function createChart(id, data) {
                 new Chart($(id), {
                     type: 'line',
-                    data: {
-                        labels: labels,
-                        datasets: [{
-                            label: 'Temperature',
-                            data: values,
-                            backgroundColor: [
-                                'rgba(255, 99, 132, 0.2)',
-                                'rgba(54, 162, 235, 0.2)',
-                                'rgba(255, 206, 86, 0.2)',
-                                'rgba(75, 192, 192, 0.2)',
-                                'rgba(153, 102, 255, 0.2)',
-                                'rgba(255, 159, 64, 0.2)'
-                            ],
-                            borderColor: [
-                                'rgba(255,99,132,1)',
-                                'rgba(54, 162, 235, 1)',
-                                'rgba(255, 206, 86, 1)',
-                                'rgba(75, 192, 192, 1)',
-                                'rgba(153, 102, 255, 1)',
-                                'rgba(255, 159, 64, 1)'
-                            ],
-                            borderWidth: 1
-                        }]
-                    },
+                    data: data,
                     options: {
-                        scales: {
-                            yAxes: [{
-                                ticks: {min: 10.0, max: 30.0}
-                            }]
+                        legend: {
+                            display: false,
+                            position: 'bottom'
+                        },
+                        tooltips: {
+                            enabled: true,
+                            mode: 'label'
+                        },
+                        hover: {
+                            mode: 'label'
                         }
                     }
                 });
@@ -52,14 +36,18 @@
     </script>
 {% endblock %}
 {% block content %}
-<section>
+<div class="sensor-container">
     {% for sensor in sensors %}
-        <h1>Sensor {{sensor.sid}}</h1>
-        Description: {{sensor.description}}<br>
-        Battery voltage: {{sensor.battery}}v<br>
-        Value: {{sensor.value}}<br>
-        Readings:<br>
-        <canvas id="sensor_{{sensor.sid}}" width="400" height="150"></canvas>
+    <section class="sensor-section">
+            <h1>Sensor {{sensor.title}}</h1>
+            Sensor ID: {{sensor.sid}}<br>
+            Description: {{sensor.description}}<br>
+            Battery voltage: {{sensor.battery}}v<br>
+            Value: {{sensor.value}}<br>
+            Last update: {{sensor.updated.strftime("%d.%m.%Y %H:%M")}}<br>
+            <br>
+            <canvas id="sensor_{{sensor.sid}}" width="400" height="150"></canvas>
+    </section>
     {% endfor %}
-</section>
+</div>
 {% endblock%}

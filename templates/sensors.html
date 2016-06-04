@@ -7,12 +7,13 @@
 {% block content %}
 <section>
     <table>
-        <tr><th>Sensor ID</th><th>Description</th><th>Token</th><th>Value</th><th>Battery</th><th>Actions</th></tr>
+        <tr><th>Sensor ID</th><th>Title</th><th>Description</th><th>Token</th><th>Value</th><th>Battery</th><th>Actions</th></tr>
         {% for sensor in sensors %}
             <tr>
                 <form action="/sensors/" method="POST">
                     <input type="hidden" name="sid" value="{{sensor.sid}}" />
                     <td>{{sensor.sid}}</td>
+                    <td>{{sensor.title}}</td>
                     <td>{{sensor.description}}</td>
                     <td>{{sensor.token}}</td>
                     <td>{{sensor.value}}</td>
@@ -25,7 +26,8 @@
             <form action="/sensors/" method="POST">
                 <td><input type="number" name="sid" placeholder="Sensor ID"></td>
                 <td><input type="text" name="description" placeholder="Description"></td>
-                <td></td>
+                <td><input type="text" name="title" placeholder="Title"></td>
+                <td><input type="text" name="token" placeholder="LEAVE BLANK"></td>
                 <td></td>
                 <td></td>
                 <td><input type="submit" name="add" value="Add" /></td>
