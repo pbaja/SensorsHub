@@ -19,8 +19,17 @@
                     data: data,
                     options: {
                         legend: {
-                            display: false,
-                            position: 'bottom'
+                            display: true,
+                            position: 'bottom',
+                            cursor: 'pointer',
+                            itemclick: function(e) {
+                                if (typeof (e.dataSeries.visible) === "undefined" || e.dataSeries.visible) {
+                                    e.dataSeries.visible = false;
+                                } else {
+                                    e.dataSeries.visible = true;
+                                }
+                                e.chart.render();
+                            }
                         },
                         tooltips: {
                             enabled: true,

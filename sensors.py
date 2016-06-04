@@ -40,8 +40,6 @@ class Sensor(object):
             else: updated = 0
             results = conn.execute("SELECT updated, value, battery FROM readings WHERE sid=? AND updated > ?;",[self.sid,updated]).fetchall()
 
-            print(len(results))
-
             readings = []
             for result in results:
                 readings.append(Reading(self.sid, result[0],result[1],result[2]))
