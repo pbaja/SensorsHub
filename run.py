@@ -2,7 +2,8 @@
 import cherrypy, os, json, sqlite3, time, datetime
 from jinja2 import Environment, FileSystemLoader
 
-from sensors import Sensor, Sensors
+from sensors import Sensors
+from accounts import Accounts
 
 class Core(object):
     def __init__(self):
@@ -16,6 +17,9 @@ class Core(object):
         # Create and read sensors from database
         self.sensors = Sensors()
         self.sensors.load()
+
+        # Create and load accounts
+        self.accounts = Accounts()
 
         # Create website
         cherrypy.config.update({
@@ -57,8 +61,6 @@ class WebRoot(object):
         for arg, value in kwargs.items():
             arg = arg.split("_")
             settings[int(arg[1])].update({arg[0]: value})
-
-        print(settings)
 
         # Generate chart data
         for sensor in sensors:
@@ -109,6 +111,10 @@ class WebRoot(object):
 
     @cherrypy.expose
     def sensors(self, *args, **kwargs):
+        if not self.core.accounts.verify_user():
+            cherrypy.serving.response.headers['www-authenticate'] = 'Basic realm="Please login"'
+            raise cherrypy.HTTPError(401, "You are not authorized to access that resource")
+
         if "add" in kwargs:
             try:
                 if kwargs["token"] != "":
