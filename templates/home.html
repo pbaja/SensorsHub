@@ -10,6 +10,7 @@
             for (i=0; i<sensors.length; ++i) {
                 var sensor = sensors[i];
                 console.log(sensor);
+                $("#average_"+sensor["sid"]).text(sensor["average"]);
                 createChart("#sensor_"+sensor["sid"],sensor["data"]);
             }
 
@@ -45,6 +46,7 @@
     </script>
 {% endblock %}
 {% block content %}
+<form action="/index/" method="POST">
 <div class="sensor-container">
     {% for sensor in sensors %}
     <section class="sensor-section">
@@ -52,11 +54,31 @@
             Sensor ID: {{sensor.sid}}<br>
             Description: {{sensor.description}}<br>
             Battery voltage: {{sensor.battery}}v<br>
-            Value: {{sensor.value}}<br>
+            Value: {{sensor.value}} (Average <span id="average_{{sensor.sid}}"></span>)<br>
             Last update: {{sensor.updated.strftime("%d.%m.%Y %H:%M")}}<br>
+            Range:
+            <select name="range_{{sensor.sid}}">
+                {% set range = settings[sensor.sid]["range"] %}
+                <option value="6" {% if range == "6" %}selected{% endif %}>Last 6h</option>
+                <option value="24" {% if range == "24" %}selected{% endif %}>Last 24h</option>
+                <option value="168" {% if range == "168" %}selected{% endif %}>Last 7d</option>
+                <option value="744" {% if range == "744" %}selected{% endif %}>Last 31d</option>
+            </select>
+            Average by:
+            <select name="group_{{sensor.sid}}">
+                {% set group = settings[sensor.sid]["group"] %}
+                <option value="-">None</option>
+                <option value="H" {% if group == "H" %}selected{% endif %}>Hour</option>
+                <option value="d" {% if group == "d" %}selected{% endif %}>Day</option>
+                <option value="m" {% if group == "m" %}selected{% endif %}>Month</option>
+                <option value="Y" {% if group == "Y" %}selected{% endif %}>Year</option>
+            </select>
+            <input type="submit" value="Update" />
+        <br>
             <br>
             <canvas id="sensor_{{sensor.sid}}" width="400" height="150"></canvas>
     </section>
     {% endfor %}
 </div>
+</form>
 {% endblock%}

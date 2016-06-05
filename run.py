@@ -46,25 +46,46 @@ class WebRoot(object):
         self.core = core
 
     @cherrypy.expose
-    def index(self):
-        sensors = self.core.sensors.sensors
+    def index(self, *args, **kwargs):
+        sensors = self.core.sensors.sensors[:]
         data = []
+        settings = {}
+
+        # Get settings from kwargs
+        for sensor in sensors:
+            settings[sensor.sid] = {"group": None, "range": None}
+        for arg, value in kwargs.items():
+            arg = arg.split("_")
+            settings[int(arg[1])].update({arg[0]: value})
+
+        print(settings)
 
         # Generate chart data
         for sensor in sensors:
+            # Add current settings from kwargs
+            if settings[sensor.sid]["group"] and settings[sensor.sid]["group"] != "-": group = "%"+settings[sensor.sid]["group"]
+            else: group = None
+            if settings[sensor.sid]["range"]: range = int(settings[sensor.sid]["range"])
+            else: range = 24
+
             # Read all values
             labels = []
             values = []
             voltages = []
-            readings = sensor.get_readings(60*60*24)
+            average = 0.0
+            readings = sensor.get_readings(60*60*range,group)
             for reading in readings:
-                labels.append(datetime.datetime.fromtimestamp(reading.updated).strftime("%H:%M"))
-                values.append(reading.value)
-                voltages.append(reading.battery)
+                labels.append(datetime.datetime.fromtimestamp(reading.updated).strftime(group if group else "%H:%M"))
+                values.append(round(reading.value,2))
+                voltages.append(round(reading.battery,2))
+                average += reading.value
+
+            average /= len(readings) if len(readings) > 0 else 1
 
             # Create data for chart
             data.append({
                 "sid": sensor.sid,
+                "average": round(average,2),
                 "data": {
                     "labels": labels,
                     "datasets": [
@@ -84,7 +105,7 @@ class WebRoot(object):
                 }
             });
 
-        return self.env.get_template('home.html').render(sensors=sensors, data=json.dumps(data))
+        return self.env.get_template('home.html').render(sensors=sensors, data=json.dumps(data), settings=settings)
 
     @cherrypy.expose
     def sensors(self, *args, **kwargs):
@@ -110,8 +131,6 @@ class WebRoot(object):
 
     @cherrypy.expose
     def api(self, *args, **kwargs):
-        print(args)
-
         sensor = self.core.sensors.get(int(args[0]))
         if sensor:
             if sensor.token == kwargs["token"]:

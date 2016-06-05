@@ -34,14 +34,20 @@ class Sensor(object):
         self.battery = battery
         self.updated = datetime.now()
 
-    def get_readings(self, delta=None):
+    def get_readings(self, delta=None, group_by=None):
         with sqlite3.connect("db.sqlite") as conn:
             if delta: updated = time.time()-delta
             else: updated = 0
-            results = conn.execute("SELECT updated, value, battery FROM readings WHERE sid=? AND updated > ?;",[self.sid,updated]).fetchall()
+
+            if group_by:
+                results = conn.execute(
+                    "SELECT updated, AVG(value), AVG(battery) FROM readings WHERE sid=? AND updated > ? "
+                    "GROUP BY strftime(?,datetime(updated, 'unixepoch')) ORDER BY updated;", [self.sid, updated, group_by])
+            else:
+                results = conn.execute("SELECT updated, value, battery FROM readings WHERE sid=? AND updated > ?;",[self.sid, updated])
 
             readings = []
-            for result in results:
+            for result in results.fetchall():
                 readings.append(Reading(self.sid, result[0],result[1],result[2]))
             return readings
 
