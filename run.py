@@ -67,15 +67,17 @@ class WebRoot(object):
             # Add current settings from kwargs
             if settings[sensor.sid]["group"] and settings[sensor.sid]["group"] != "-": group = "%"+settings[sensor.sid]["group"]
             else: group = None
-            if settings[sensor.sid]["range"]: range = int(settings[sensor.sid]["range"])
-            else: range = 24
+            if settings[sensor.sid]["range"]:
+                if settings[sensor.sid]["range"] == "-": range = None
+                else: range = 60*60*int(settings[sensor.sid]["range"])
+            else: range = 60*60*24
 
             # Read all values
             labels = []
             values = []
             voltages = []
             average = 0.0
-            readings = sensor.get_readings(60*60*range,group)
+            readings = sensor.get_readings(range,group)
             for reading in readings:
                 labels.append(datetime.datetime.fromtimestamp(reading.updated).strftime(group if group else "%H:%M"))
                 values.append(round(reading.value,2))
