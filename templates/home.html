@@ -38,6 +38,9 @@
                         },
                         hover: {
                             mode: 'label'
+                        },
+                        animation: {
+                            duration: 0
                         }
                     }
                 });
@@ -50,38 +53,47 @@
 <div class="sensor-container">
     {% for sensor in sensors %}
     <section class="sensor-section">
-            <h1>Sensor {{sensor.title}}</h1>
-            Sensor ID: {{sensor.sid}}<br>
-            Description: {{sensor.description}}<br>
-            Battery voltage: {{sensor.battery}}v<br>
-            Value: {{sensor.value}} (Average <span id="average_{{sensor.sid}}"></span>)<br>
-            Last update: {{sensor.updated.strftime("%d.%m.%Y %H:%M")}}<br>
-            Range:
-            <select name="range_{{sensor.sid}}">
-                {% set range = settings[sensor.sid]["range"] %}
-                <option value="1" {% if range == "1" %}selected{% endif %}>Last 1 hour</option>
-                <option value="3" {% if range == "3" %}selected{% endif %}>Last 3 hours</option>
-                <option value="6" {% if range == "6" %}selected{% endif %}>Last 6 hours</option>
-                <option value="24" {% if range == "24" %}selected{% endif %}>Last 24 hours</option>
-                <option value="168" {% if range == "168" %}selected{% endif %}>Last 7 days</option>
-                <option value="744" {% if range == "744" %}selected{% endif %}>Last 31 days</option>
-                <option value="2232" {% if range == "2232" %}selected{% endif %}>Last 3 months</option>
-                <option value="8760" {% if range == "8760" %}selected{% endif %}>Last year</option>
-                <option value="-" {% if range == "-" %}selected{% endif %}>All</option>
-            </select>
-            Average by:
-            <select name="group_{{sensor.sid}}">
-                {% set group = settings[sensor.sid]["group"] %}
-                <option value="-" {% if group == "-" %}selected{% endif %}>None</option>
-                <option value="H" {% if group == "H" %}selected{% endif %}>Hour</option>
-                <option value="d" {% if group == "d" %}selected{% endif %}>Day</option>
-                <option value="m" {% if group == "m" %}selected{% endif %}>Month</option>
-                <option value="Y" {% if group == "Y" %}selected{% endif %}>Year</option>
-            </select>
-            <input type="submit" value="Update" />
-        <br>
-            <br>
-            <canvas id="sensor_{{sensor.sid}}" width="400" height="150"></canvas>
+        <div class="sensor-title">{{sensor.title}}</div>
+        <div class="tag orange">{{sensor.value}}&deg;C</div>
+        <div class="tag orange">Avg <span id="average_{{sensor.sid}}"></span>&deg;C</div>
+        <div class="tag blue">{{sensor.battery}}v</div>
+        <div class="tag gray">{{sensor.updated.strftime("%d.%m.%Y %H:%M")}}</div>
+        <div class="tag gray input" onclick="$('#graph_{{sensor.sid}}').toggle();$('#sensor_{{sensor.sid}}').toggle()"><i class="fa fa-line-chart" aria-hidden="true"></i></div>
+        <span id="graph_{{ sensor.sid }}">
+            <div class="tag gray">
+                Range:
+                <select name="range_{{sensor.sid}}">
+                    {% set range = settings[sensor.sid]["range"] %}
+                    <option value="1" {% if range == "1" %}selected{% endif %}>Last 1 hour</option>
+                    <option value="3" {% if range == "3" %}selected{% endif %}>Last 3 hours</option>
+                    <option value="6" {% if range == "6" %}selected{% endif %}>Last 6 hours</option>
+                    <option value="12" {% if range == "12" %}selected{% endif %}>Last 12 hours</option>
+                    <option value="24" {% if range == "24" %}selected{% endif %}>Last 24 hours</option>
+                    <option value="48" {% if range == "48" %}selected{% endif %}>Last 48 hours</option>
+                    <option value="168" {% if range == "168" %}selected{% endif %}>Last 7 days</option>
+                    <option value="336" {% if range == "336" %}selected{% endif %}>Last 14 days</option>
+                    <option value="744" {% if range == "744" %}selected{% endif %}>Last 31 days</option>
+                    <option value="2232" {% if range == "2232" %}selected{% endif %}>Last 3 months</option>
+                    <option value="8760" {% if range == "8760" %}selected{% endif %}>Last year</option>
+                    <option value="0" {% if range == "0" %}selected{% endif %}>All</option>
+                </select>
+            </div>
+            <div class="tag gray">
+                Average by:
+                <select name="group_{{sensor.sid}}">
+                    {% set group = settings[sensor.sid]["group"] %}
+                    <option value="0" {% if group == "0" %}selected{% endif %}>None</option>
+                    <option value="15" {% if group == "15" %}selected{% endif %}>15 Minutes</option>
+                    <option value="30" {% if group == "30" %}selected{% endif %}>30 Minutes</option>
+                    <option value="60" {% if group == "60" %}selected{% endif %}>1 Hour</option>
+                    <option value="1440" {% if group == "1440" %}selected{% endif %}>1 Day</option>
+                    <option value="44640" {% if group == "44640" %}selected{% endif %}>31 Days</option>
+                    <option value="525600" {% if group == "525600" %}selected{% endif %}>1 Year</option>
+                </select>
+            </div>
+            <input class="tag gray input" type="submit" value="Update" />
+        </span>
+        <canvas id="sensor_{{sensor.sid}}" width="400" height="150"></canvas>
     </section>
     {% endfor %}
 </div>

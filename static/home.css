@@ -4,6 +4,33 @@
 }
 .sensor-section {
     flex: 1;
-    min-width: 300px;
     width: 50%;
+    min-width: 300px;
+    padding: 10px;
+}
+.sensor-title {
+    vertical-align: middle;
+    font-size: 1.5em;
+    font-weight: bold;
+}
+
+.tag {
+    display: inline-block;
+    vertical-align: middle;
+    height: 30px;
+    line-height: 30px;
+    margin: 5px 3px;
+    padding: 0 10px;
+    border: none;
+    border-radius: 3px;
+    background-color: #333;
+    color: #FFF;
+}
+.tag.orange { background-color: #F90; }
+.tag.blue { background-color: #37F; }
+.tag.gray { background-color: #666; }
+
+.tag.input:hover {
+    cursor: pointer;
+    opacity: 0.9;
 }

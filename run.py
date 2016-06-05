@@ -65,21 +65,31 @@ class WebRoot(object):
         # Generate chart data
         for sensor in sensors:
             # Add current settings from kwargs
-            if settings[sensor.sid]["group"] and settings[sensor.sid]["group"] != "-": group = "%"+settings[sensor.sid]["group"]
-            else: group = None
+            group_minutes = 15
+            group_labels = "%H:%M"
+            if settings[sensor.sid]["group"]:
+                group_minutes = int(settings[sensor.sid]["group"])
+                if group_minutes >= 525600:
+                    group_labels = "%Y"
+                elif group_minutes >= 1440:
+                    group_labels = "%d.%m"
+            else:
+                settings[sensor.sid]["group"] = "15"
+
+            range = 60*60*24
             if settings[sensor.sid]["range"]:
-                if settings[sensor.sid]["range"] == "-": range = None
-                else: range = 60*60*int(settings[sensor.sid]["range"])
-            else: range = 60*60*24
+                range = 60*60*int(settings[sensor.sid]["range"])
+            else:
+                settings[sensor.sid]["range"] = "24"
 
             # Read all values
             labels = []
             values = []
             voltages = []
             average = 0.0
-            readings = sensor.get_readings(range,group)
+            readings = sensor.get_readings(range,group_minutes)
             for reading in readings:
-                labels.append(datetime.datetime.fromtimestamp(reading.updated).strftime(group if group else "%H:%M"))
+                labels.append(datetime.datetime.fromtimestamp(reading.updated).strftime(group_labels))
                 values.append(round(reading.value,2))
                 voltages.append(round(reading.battery,2))
                 average += reading.value
