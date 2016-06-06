@@ -4,33 +4,18 @@
 }
 .sensor-section {
     flex: 1;
-    width: 50%;
-    min-width: 300px;
+    max-width: 125px;
     padding: 10px;
-}
-.sensor-title {
-    vertical-align: middle;
-    font-size: 1.5em;
-    font-weight: bold;
-}
-
-.tag {
-    display: inline-block;
-    vertical-align: middle;
-    height: 30px;
-    line-height: 30px;
-    margin: 5px 3px;
-    padding: 0 10px;
-    border: none;
-    border-radius: 3px;
-    background-color: #333;
+    text-align: center;
+    text-decoration: none;
+    background-color: #699E00;
     color: #FFF;
+    border-radius: 3px;
 }
-.tag.orange { background-color: #F90; }
-.tag.blue { background-color: #37F; }
-.tag.gray { background-color: #666; }
+.sensor-section:hover {
+    opacity: 0.95;
+}
 
-.tag.input:hover {
-    cursor: pointer;
-    opacity: 0.9;
+.sensor-title {
+    font-size: 2em;
 }

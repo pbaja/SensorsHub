@@ -28,6 +28,12 @@ class Accounts(object):
             return True
         return False
 
+    def protect(self):
+        """Use this function, when you want users to log in before accessing page"""
+        if not self.verify_user():
+            cherrypy.serving.response.headers['www-authenticate'] = 'Basic realm="Please login"'
+            raise cherrypy.HTTPError(401, "You are not authorized to access that resource")
+
     def verify_user(self):
         user = cherrypy.request.cookie.get("user")
         session = cherrypy.request.cookie.get("session")

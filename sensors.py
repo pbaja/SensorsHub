@@ -39,15 +39,20 @@ class Sensor(object):
             if delta != 0: updated = time.time()-delta
             else: updated = 0
 
-            print(group_minutes)
-            print(type(group_minutes))
+            group_add = "%Y"
+            if group_minutes[-1] != "m":
+                group_add += "%m"
+                if group_minutes[-1] != "d":
+                    group_add += "%d"
+                    if group_minutes[-1] != "H":
+                        group_add += "%H0"
 
             if group_minutes != 0:
                 results = conn.execute(
                     "SELECT updated, AVG(value), AVG(battery) FROM readings WHERE sid=? AND updated > ? "
-                    "GROUP BY strftime('%Y%m%d%H0',datetime(updated, 'unixepoch'))+strftime('%M',datetime(updated, 'unixepoch'))/? "
+                    "GROUP BY strftime(?,datetime(updated, 'unixepoch'))+strftime(?,datetime(updated, 'unixepoch'))/? "
                     "ORDER BY updated;",
-                    [self.sid, updated, group_minutes])
+                    [self.sid, updated, group_add,'%'+group_minutes[-1], group_minutes[:-1]])
             else:
                 results = conn.execute("SELECT updated, value, battery FROM readings WHERE sid=? AND updated > ?;",[self.sid, updated])
 
