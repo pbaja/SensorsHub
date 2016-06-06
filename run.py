@@ -14,7 +14,7 @@ class Core(object):
             conn.execute(
                 """CREATE TABLE IF NOT EXISTS readings(sid, updated INT, value FLOAT, battery FLOAT)""")
             conn.execute(
-                """CREATE TABLE IF NOT EXISTS accounts(uid INTEGER PRIMARY KEY, session TEXT, user TEXT, password TEXT, lastlogin INTEGER, email TEXT)""")
+                """CREATE TABLE IF NOT EXISTS accounts(uid INTEGER PRIMARY KEY, session TEXT, user TEXT UNIQUE , password TEXT, lastlogin INTEGER, email TEXT)""")
 
         # Create and read sensors from database
         self.sensors = Sensors()
@@ -54,6 +54,13 @@ class WebRoot(object):
     @cherrypy.expose
     def index(self):
         return self.env.get_template('home.html').render(sensors=self.core.sensors.sensors)
+
+    @cherrypy.expose
+    def logout(self):
+        if self.core.accounts.logout_user():
+            return self.env.get_template('home.html').render(sensors=self.core.sensors.sensors,msg="Logged out")
+        else:
+            return self.env.get_template('home.html').render(sensors=self.core.sensors.sensors, msg="Failed to logout")
 
     @cherrypy.expose
     def single(self, *args, **kwargs):
