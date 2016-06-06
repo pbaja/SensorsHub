@@ -1,38 +1,47 @@
 {% extends "base.html" %}
 {% block head %}
     {{ super() }}
+    <link rel="stylesheet" media="all" href="/static/sensors.css"/>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.1.4/Chart.min.js"></script>
 {% endblock %}
 {% block content %}
-<section>
-    <table>
-        <tr><th>Sensor ID</th><th>Title</th><th>Description</th><th>Token</th><th>Value</th><th>Battery</th><th>Actions</th></tr>
-        {% for sensor in sensors %}
-            <tr>
+{% for sensor in sensors %}
+    <section class="sensor-section">
+        <div class="sensor-title">{{ sensor.title }} <span class="sensor-description">{{ sensor.description }}</span></div>
+        Sensor ID: {{ sensor.sid }}<br>
+        Token: {{ sensor.token }}<br>
+        Updated: {% if sensor.updated %}{{ sensor.updated | strftime }}{% else %}Never{% endif %}<br>
+        Fields: <br>
+        <table>
+            <tr><th>Field ID</th><th>Name</th><th>Display name</th><th>Unit</th><th>Icon</th><th>Colors</th><th>Actions</th></tr>
+            {% for field in sensor.get_fields() %}
                 <form action="/sensors/" method="POST">
-                    <input type="hidden" name="sid" value="{{sensor.sid}}" />
-                    <td>{{sensor.sid}}</td>
-                    <td>{{sensor.title}}</td>
-                    <td>{{sensor.description}}</td>
-                    <td>{{sensor.token}}</td>
-                    <td>{{sensor.value}}</td>
-                    <td>{{sensor.battery}}</td>
-                    <td><input type="submit" name="remove" value="Remove" /></td>
+                    <input type="hidden" name="action" value="update_field"/>
+                    <input type="hidden" name="fid" value="{{ field.fid }}"/>
+                    <tr>
+                        <td>{{ field.fid }}</td>
+                        <td>{{ field.name }}</td>
+                        <td><input type="text" name="display_name" value="{{ field.display_name }}"/></td>
+                        <td><input type="text" name="unit" value="{{ field.unit }}"/></td>
+                        <td><input type="text" name="icon" value="{{ field.icon }}"/></td>
+                        <td><input type="color" name="color" value="{{ field.color }}"/></td>
+                        <td><input class="button" type="submit" value="Update"/><a class="button" href="/sensors/?action=remove_field&fid={{ field.fid }}">Remove</a></td>
+                    <tr>
                 </form>
-            </tr>
-        {% endfor %}
-        <tr>
-            <form action="/sensors/" method="POST">
-                <td><input type="number" name="sid" placeholder="Sensor ID"></td>
-                <td><input type="text" name="description" placeholder="Description"></td>
-                <td><input type="text" name="title" placeholder="Title"></td>
-                <td><input type="text" name="token" placeholder="LEAVE BLANK"></td>
-                <td></td>
-                <td></td>
-                <td><input type="submit" name="add" value="Add" /></td>
-            </form>
-        </tr>
-    </table>
+            {% endfor %}
+        </table>
+        <a class="button" href="/sensors?sid={{ sensor.sid }}&action=remove">Remove</a>
+        <a class="button" href="/sensors?sid={{ sensor.sid }}&action=regen">Regenerate token</a>
+    </section>
+{% endfor %}
+<section class="sensor-section">
+    <div class="sensor-title">Add new</div>
+    <form action="/sensors/" method="POST">
+        <input type="number" name="sid" placeholder="SensorID" />
+        <input type="text" name="title" placeholder="Title" />
+        <input type="text" name="description" placeholder="Description" />
+        <input class="Button" type="submit" name="action" value="Add" /><br>
+    </form>
 </section>
 {% endblock%}

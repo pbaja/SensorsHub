@@ -4,7 +4,8 @@
 }
 .sensor-section {
     flex: 1;
-    max-width: 125px;
+    max-width: 256px;
+    max-height: 256px;
     padding: 10px;
     text-align: center;
     text-decoration: none;

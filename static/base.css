@@ -94,6 +94,7 @@ section {
     border: 1px solid #10a1de;
 }
 .button:hover {
+    cursor: pointer;
     transition: all 0.1s;
     background-color: #00aeff;
     border: 1px solid transparent;

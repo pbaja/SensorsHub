@@ -9,9 +9,13 @@
 <section>
     <div class="sensor-container">
         {% for sensor in sensors %}
+            {% set latest = sensor.get_latest() %}
             <a class="sensor-section" href="/single/{{ sensor.sid }}">
                 <div class="sensor-title">{{ sensor.title }}</div>
-                {{ sensor.value }}&deg;C
+                Updated: {{ sensor.updated|strftime }}<br>
+                {% for field in latest %}
+                    {{ field.display_name }}: {{ field.readings[0].value }}{{ field.unit }}<br>
+                {% endfor %}
             </a>
         {% endfor %}
     </div>

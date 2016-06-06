@@ -1,0 +1,13 @@
+.sensor-section {
+    display: block;
+    margin: 15px
+}
+.sensor-title {
+    font-size: 2em;
+    font-weight: bold;
+}
+.sensor-description {
+    font-size: 0.5em;
+    font-weight: normal;
+    color: #777;
+}

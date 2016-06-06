@@ -8,7 +8,6 @@
         $(document).ready(function() {
             var sensor = JSON.parse('{{data}}');
             console.log(sensor);
-            $("#average").text(sensor["average"]);
             createChart("#graph",sensor["data"]);
 
             function createChart(id, data) {
@@ -50,9 +49,7 @@
 <section>
     <div class="sensor-title">{{sensor.title}} <span class="sensor-description">{{ sensor.description }}</span></div>
     <div class="tag orange">{{sensor.value}}&deg;C</div>
-    <div class="tag orange">Avg <span id="average"></span>&deg;C</div>
-    <div class="tag blue">{{sensor.battery}}v</div>
-    <div class="tag gray">{{sensor.updated.strftime("%d.%m.%Y %H:%M")}}</div>
+    <div class="tag gray">{{sensor.updated|strftime}}</div>
     <div class="tag gray">
         Range:
         <select name="range">
