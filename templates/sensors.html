@@ -14,7 +14,7 @@
         Updated: {% if sensor.updated %}{{ sensor.updated | strftime }}{% else %}Never{% endif %}<br>
         Fields: <br>
         <table>
-            <tr><th>Field ID</th><th>Name</th><th>Display name</th><th>Unit</th><th>Icon</th><th>Colors</th><th>Actions</th></tr>
+            <tr><th>Field ID</th><th>Name</th><th>Display name</th><th>Unit</th><th>Icon</th><th>Color</th><th>Actions</th></tr>
             {% for field in sensor.get_fields() %}
                 <form action="/sensors/" method="POST">
                     <input type="hidden" name="action" value="update_field"/>

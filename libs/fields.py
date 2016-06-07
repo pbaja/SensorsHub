@@ -58,9 +58,7 @@ class Field(object):
             values.append(name)
 
         with sqlite3.connect("db.sqlite") as conn:
-            query = "SELECT sid, fid, name, unit, display_name, style FROM fields WHERE " + " AND ".join(where)
-            print(query)
-            results = conn.execute(query,values).fetchall()
+            results = conn.execute("SELECT sid, fid, name, unit, display_name, style FROM fields WHERE " + " AND ".join(where),values).fetchall()
             if len(results) > 0:
                 fields = []
                 for result in results:
@@ -97,14 +95,14 @@ class Field(object):
             # If group_minutes not equals '1S', average results by group_minutes
             if group_minutes != "1S":
                 results = conn.execute(
-                    "SELECT updated, fid, AVG(value) FROM readings WHERE sid=? AND fid=? AND updated > ? "
+                    "SELECT fid, updated, AVG(value) FROM readings WHERE sid=? AND fid=? AND updated > ? "
                     "GROUP BY strftime(?,datetime(updated, 'unixepoch'))+strftime(?,datetime(updated, 'unixepoch'))/? "
                     "ORDER BY updated",
                     [self.sid, self.fid, updated, group_add, '%' + group_minutes[-1], group_minutes[:-1]])
             # Otherwise, get all readings withouth averaging
             else:
                 results = conn.execute(
-                    "SELECT updated, fid, value FROM readings WHERE sid=? AND fid=? AND updated > ?;",
+                    "SELECT fid, updated, value FROM readings WHERE sid=? AND fid=? AND updated > ?;",
                     [self.sid, self.fid, updated])
 
             # Create readings from results

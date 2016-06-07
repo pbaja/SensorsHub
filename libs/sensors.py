@@ -44,10 +44,6 @@ class Sensor(object):
             conn.execute("INSERT INTO readings (sid, fid, updated, value) VALUES (?,?,?,?);",
                          [self.sid,field.fid,int(time.time()),value])
 
-            # Update values in field
-            field.updated = int(time.time())
-            field.value = value
-
             # Update values in object
             self.value = value
             self.updated = int(time.time())

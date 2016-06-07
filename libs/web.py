@@ -1,4 +1,4 @@
-import cherrypy,  json, datetime, sqlite3
+import cherrypy,  json, datetime, sqlite3, time
 from jinja2 import Environment, FileSystemLoader
 
 from libs.fields import Field
@@ -25,26 +25,31 @@ class WebRoot(object):
         # Save core object
         self.core = core
 
+    def bench(self, started):
+        """Internal function used to test page generation time"""
+        return "<!-- Page generated in {}ms -->".format(round(time.time() - started, 4))
+
     @cherrypy.expose
     def index(self):
-        return self.env.get_template('home.html').render(sensors=self.core.sensors.sensors)
+        start = time.time()
+        return self.env.get_template('home.html').render(sensors=self.core.sensors.sensors)+self.bench(start)
 
     @cherrypy.expose
     def logout(self):
+        start = time.time()
         if self.core.accounts.logout_user():
-            return self.env.get_template('home.html').render(sensors=self.core.sensors.sensors,msg="Logged out")
+            return self.env.get_template('home.html').render(sensors=self.core.sensors.sensors,msg="Logged out")+self.bench(start)
         else:
-            return self.env.get_template('home.html').render(sensors=self.core.sensors.sensors, msg="Failed to logout")
+            return self.env.get_template('home.html').render(sensors=self.core.sensors.sensors, msg="Failed to logout")+self.bench(start)
 
     @cherrypy.expose
     def single(self, *args, **kwargs):
+        start = time.time()
         if len(args) != 1: raise cherrypy.HTTPRedirect("/index")
-
         sensor = self.core.sensors.get(int(args[0]))
-        settings = {}
 
         # Get settings from kwargs
-        settings = {"group": None, "range": None}
+        settings = {"group": "15M", "range": "24"}
         for arg, value in kwargs.items():
             arg = arg.split("_")
             settings.update({arg[0]: value})
@@ -55,9 +60,9 @@ class WebRoot(object):
             group_labels = "%H:%M"
             if settings["group"]:
                 group_by = settings["group"]
-                time = (2208989361.0 + datetime.datetime.strptime(group_by[:-1], "%" + group_by[-1]).timestamp()) / 60.0
-                if time >= 525600: group_labels = "%Y"
-                elif time >= 1440: group_labels = "%d.%m"
+                ttime = (2208989361.0 + datetime.datetime.strptime(group_by[:-1], "%" + group_by[-1]).timestamp()) / 60.0
+                if ttime >= 525600: group_labels = "%Y"
+                elif ttime >= 1440: group_labels = "%d.%m"
             else:
                 settings["group"] = "15M"
 
@@ -69,40 +74,40 @@ class WebRoot(object):
                 settings["range"] = "24"
 
             # Read all readings
-            labels = []
             datasets = []
             fields = sensor.get_readings(range, group_by)
-            for reading in fields[0].readings:
-                labels.append(datetime.datetime.fromtimestamp(reading.updated).strftime(group_labels))
+            labels = {}
             for field in fields:
                 dataset = {"label": field.display_name, "data": [], "fill": False, "borderColor": field.color}
                 for reading in field.readings:
                     dataset["data"].append(reading.value)
+                    labels[datetime.datetime.fromtimestamp(reading.updated).strftime(group_labels)] = None
                 datasets.append(dataset)
 
             # Create data for chart
             data = {
                 "sid": sensor.sid,
                 "data": {
-                    "labels": labels,
+                    "labels": list(labels.keys()),
                     "datasets": datasets
                 }
             };
 
-            return self.env.get_template('single.html').render(sensor=sensor, data=json.dumps(data), settings=settings)
+            return self.env.get_template('single.html').render(sensor=sensor, settings=settings, data=json.dumps(data))+self.bench(start)
 
     @cherrypy.expose
     def sensors(self, *args, **kwargs):
+        start = time.time()
         self.core.accounts.protect()
 
         if "action" in kwargs:
             if kwargs["action"] == "remove":
                 if self.core.sensors.remove(int(kwargs["sid"])):
                     return self.env.get_template('sensors.html').render(sensors=self.core.sensors.sensors,
-                                                                        msg="Sensor removed")
+                                                                        msg="Sensor removed")+self.bench(start)
                 else:
                     return self.env.get_template('sensors.html').render(sensors=self.core.sensors.sensors,
-                                                                    msg="Failed to remove sensor")
+                                                                    msg="Failed to remove sensor")+self.bench(start)
 
             elif kwargs["action"] == "update_field":
                 field = Field.get(fid=int(kwargs["fid"]))[0]
@@ -112,38 +117,38 @@ class WebRoot(object):
                 field.color = kwargs["color"]
                 field.commit()
                 return self.env.get_template('sensors.html').render(sensors=self.core.sensors.sensors,
-                                                                        msg="Field updated")
+                                                                        msg="Field updated")+self.bench(start)
 
             elif kwargs["action"] == "remove_field":
                 if Field.remove(int(kwargs["fid"])):
                     return self.env.get_template('sensors.html').render(sensors=self.core.sensors.sensors,
-                                                                        msg="Field removed")
+                                                                        msg="Field removed")+self.bench(start)
                 else:
                     return self.env.get_template('sensors.html').render(sensors=self.core.sensors.sensors,
-                                                                        msg="Failed to remove field")
+                                                                        msg="Failed to remove field")+self.bench(start)
 
             elif kwargs["action"] == "regen":
                 sensor = self.core.sensors.get(int(kwargs["sid"]))
                 if sensor and sensor.set_token():
                     return self.env.get_template('sensors.html').render(sensors=self.core.sensors.sensors,
-                                                                        msg="Token regenerated")
+                                                                        msg="Token regenerated")+self.bench(start)
                 else:
                     return self.env.get_template('sensors.html').render(sensors=self.core.sensors.sensors,
-                                                                        msg="Failed to regenerate token")
+                                                                        msg="Failed to regenerate token")+self.bench(start)
 
             elif kwargs["action"].lower() == "add":
                 try:
                     if self.core.sensors.add(int(kwargs["sid"]),None, kwargs["title"], kwargs["description"]):
                         return self.env.get_template('sensors.html').render(sensors=self.core.sensors.sensors,
-                                                                            msg="Sensor added")
+                                                                            msg="Sensor added")+self.bench(start)
                     else:
                         return self.env.get_template('sensors.html').render(sensors=self.core.sensors.sensors,
-                                                                            msg="Failed to add sensor")
+                                                                            msg="Failed to add sensor")+self.bench(start)
                 except sqlite3.IntegrityError:
                     return self.env.get_template('sensors.html').render(sensors=self.core.sensors.sensors,
-                                                                        msg="Sensor with that ID already exist")
+                                                                        msg="Sensor with that ID already exist")+self.bench(start)
 
-        return self.env.get_template('sensors.html').render(sensors=self.core.sensors.sensors)
+        return self.env.get_template('sensors.html').render(sensors=self.core.sensors.sensors)+self.bench(start)
 
     @cherrypy.expose
     def api(self, *args, **kwargs):
