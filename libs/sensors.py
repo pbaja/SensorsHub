@@ -35,7 +35,8 @@ class Sensor(object):
             # If field does not exist, create it
             if field is None:
                 field = Field.create(sid=self.sid, name=name)
-            field = field[0]
+            else:
+                field = field[0]
 
             # Refresh sensor update timestamp
             conn.execute("UPDATE sensors SET updated=? WHERE sid=?", [int(time.time()), self.sid])

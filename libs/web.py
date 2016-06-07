@@ -166,6 +166,9 @@ class WebRoot(object):
             return json.dumps({"error": 102, "message": "Wrong token"})
 
         # Update sensor
-        for field, value in kwargs.items():
-            sensor.add_reading(field,float(value))
+        try:
+            for field, value in kwargs.items():
+                sensor.add_reading(field,float(value))
+        except ValueError:
+            return json.dumps({"error": 103, "message": "Parsing url error, make sure that all fields are floats"})
         return json.dumps({"success": 1, "message": "Sensor updated"})
