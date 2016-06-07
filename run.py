@@ -1,9 +1,11 @@
 #!/usr/bin/python3.4
-import cherrypy, os, sqlite3
+import os
+import sqlite3
+import cherrypy
 
-from web import WebRoot
-from sensors import Sensors
-from accounts import Accounts
+from libs.accounts import Accounts
+from libs.sensors import Sensors
+from libs.web import WebRoot
 
 class Core(object):
     def __init__(self):
@@ -32,7 +34,8 @@ class Core(object):
             # style - Icon (Font awesome name) and color (HEX) of the field, f.eg. bed#F0A
             # unit - Unit of the field, f.eg. &deg;C
             conn.execute(
-                """CREATE TABLE IF NOT EXISTS fields(fid INTEGER PRIMARY KEY AUTOINCREMENT, sid INTEGER, name TEXT, display_name TEXT, style TEXT, unit TEXT)""")
+                "CREATE TABLE IF NOT EXISTS fields"
+                "(fid INTEGER PRIMARY KEY AUTOINCREMENT, sid INTEGER, updated INTEGER, value FLOAT, name TEXT, display_name TEXT, style TEXT, unit TEXT)")
 
             #
             # READINGS

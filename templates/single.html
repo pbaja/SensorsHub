@@ -48,8 +48,10 @@
 <form action="/single/{{ sensor.sid }}/" method="GET">
 <section>
     <div class="sensor-title">{{sensor.title}} <span class="sensor-description">{{ sensor.description }}</span></div>
-    <div class="tag orange">{{sensor.value}}&deg;C</div>
-    <div class="tag gray">{{sensor.updated|strftime}}</div>
+    {% for field in sensor.get_latest() %}
+    <div class="tag" style="background-color: {{ field.color }}">{{ field.display_name }}: {{field.readings[0].value}}{{ field.unit }}</div>
+    {% endfor %}
+    <div class="tag gray">Updated: {{sensor.updated|strftime}}</div>
     <div class="tag gray">
         Range:
         <select name="range">

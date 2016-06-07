@@ -1,5 +1,7 @@
-import cherrypy,  json, datetime, sqlite3, random, string
+import cherrypy,  json, datetime, sqlite3
 from jinja2 import Environment, FileSystemLoader
+
+from libs.fields import Field
 
 class WebRoot(object):
 
@@ -73,7 +75,7 @@ class WebRoot(object):
             for reading in fields[0].readings:
                 labels.append(datetime.datetime.fromtimestamp(reading.updated).strftime(group_labels))
             for field in fields:
-                dataset = {"label": field.display_name, "data": [], "fill": False, "borderColor": "#FF9000"}
+                dataset = {"label": field.display_name, "data": [], "fill": False, "borderColor": field.color}
                 for reading in field.readings:
                     dataset["data"].append(reading.value)
                 datasets.append(dataset)
@@ -90,82 +92,6 @@ class WebRoot(object):
             return self.env.get_template('single.html').render(sensor=sensor, data=json.dumps(data), settings=settings)
 
     @cherrypy.expose
-    def singlesss(self, *args, **kwargs):
-        sensors = self.core.sensors.sensors[:]
-        data = []
-        settings = {}
-
-        # Get settings from kwargs
-        for sensor in sensors:
-            settings[sensor.sid] = {"group": None, "range": None}
-        for arg, value in kwargs.items():
-            arg = arg.split("_")
-            settings[int(arg[1])].update({arg[0]: value})
-
-        # Generate chart data
-        for sensor in sensors:
-            # Add current settings from kwargs
-            group_by = "15M"
-            group_labels = "%H:%M"
-            if settings[sensor.sid]["group"]:
-                group_by = settings[sensor.sid]["group"]
-                time = (2208989361.0 + datetime.datetime.strptime(group_by[:-1],"%"+group_by[-1]).timestamp())/60.0
-
-                print(time)
-
-                if time >= 525600:
-                    group_labels = "%Y"
-                elif time >= 1440:
-                    group_labels = "%d.%m"
-            else:
-                settings[sensor.sid]["group"] = "15M"
-
-            range = 60*60*24
-            if settings[sensor.sid]["range"]:
-                range = 60*60*int(settings[sensor.sid]["range"])
-            else:
-                settings[sensor.sid]["range"] = "24"
-
-            # Read all values
-            labels = []
-            values = []
-            voltages = []
-            average = 0.0
-            readings = sensor.get_readings(range,group_by)
-            for reading in readings:
-                labels.append(datetime.datetime.fromtimestamp(reading.updated).strftime(group_labels))
-                values.append(round(reading.value,2))
-                voltages.append(round(reading.battery,2))
-                average += reading.value
-
-            average /= len(readings) if len(readings) > 0 else 1
-
-            # Create data for chart
-            data.append({
-                "sid": sensor.sid,
-                "average": round(average,2),
-                "data": {
-                    "labels": labels,
-                    "datasets": [
-                        {
-                            "label": "Temperature",
-                            "data": values,
-                            "fill": False,
-                            "borderColor": "#FF9000",
-                        },
-                        {
-                            "label": "Battery",
-                            "data": voltages,
-                            "fill": False,
-                            "borderColor": "#0079C4",
-                        }
-                    ]
-                }
-            });
-
-        return self.env.get_template('single.html').render(sensors=sensors, data=json.dumps(data), settings=settings)
-
-    @cherrypy.expose
     def sensors(self, *args, **kwargs):
         self.core.accounts.protect()
 
@@ -179,16 +105,17 @@ class WebRoot(object):
                                                                     msg="Failed to remove sensor")
 
             elif kwargs["action"] == "update_field":
-                field = self.core.sensors.get_field(int(kwargs["fid"]))
-                if field.update(kwargs["display_name"],kwargs["unit"]):
-                    return self.env.get_template('sensors.html').render(sensors=self.core.sensors.sensors,
+                field = Field.get(fid=int(kwargs["fid"]))[0]
+                field.display_name = kwargs["display_name"]
+                field.unit = kwargs["unit"]
+                field.icon = kwargs["icon"]
+                field.color = kwargs["color"]
+                field.commit()
+                return self.env.get_template('sensors.html').render(sensors=self.core.sensors.sensors,
                                                                         msg="Field updated")
-                else:
-                    return self.env.get_template('sensors.html').render(sensors=self.core.sensors.sensors,
-                                                                        msg="Failed to update field")
 
             elif kwargs["action"] == "remove_field":
-                if self.core.sensors.remove_field(int(kwargs["fid"])):
+                if Field.remove(int(kwargs["fid"])):
                     return self.env.get_template('sensors.html').render(sensors=self.core.sensors.sensors,
                                                                         msg="Field removed")
                 else:
@@ -235,5 +162,5 @@ class WebRoot(object):
 
         # Update sensor
         for field, value in kwargs.items():
-            sensor.update(int(args[1]), field, float(value))
+            sensor.add_reading(field,float(value))
         return json.dumps({"success": 1, "message": "Sensor updated"})
