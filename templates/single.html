@@ -8,7 +8,7 @@
         $(document).ready(function() {
             var sensor = JSON.parse('{{data}}');
             console.log(sensor);
-            createChart("#graph",sensor["data"]);
+            createChart("#graph",sensor);
 
             function createChart(id, data) {
                 new Chart($(id), {
@@ -49,7 +49,10 @@
 <section>
     <div class="sensor-title">{{sensor.title}} <span class="sensor-description">{{ sensor.description }}</span></div>
     {% for field in sensor.get_latest() %}
-    <div class="tag" style="background-color: {{ field.color }}">{{ field.display_name }}: {{field.readings[0].value}}{{ field.unit }}</div>
+    <div class="tag" style="background-color: {{ field.color }}">
+        {% if field.icon != "None" %}<i class="fa {{ field.icon }}"></i>{% endif %}
+        {{ field.display_name }}: {{field.readings[0].value}}{{ field.unit }}
+    </div>
     {% endfor %}
     <div class="tag gray">Updated: {{sensor.updated|strftime}}</div>
     <div class="tag gray">

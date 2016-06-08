@@ -4,20 +4,85 @@
     <link rel="stylesheet" media="all" href="/static/home.css"/>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.1.4/Chart.min.js"></script>
+    <script>
+    var fids = [];
+    var chart;
+
+    function toggle(fid, elem) {
+        var i = fids.indexOf(fid);
+        if (i === -1) {
+            fids.push(fid);
+            $(elem).addClass("pushed");
+        }
+        else {
+            fids.splice(i, 1);
+            $(elem).removeClass("pushed");
+        }
+
+        if (fids.length) updateChart();
+    }
+
+    function updateChart() {
+        $.getJSON("/api/action,chart",{"fields": fids.join(",")},function(data) {
+            if(chart) chart.destroy();
+
+            chart = new Chart($("#graph"), {
+                    type: 'line',
+                    data: data,
+                    options: {
+                        legend: {
+                            display: true,
+                            position: 'bottom',
+                            cursor: 'pointer',
+                            itemclick: function(e) {
+                                if (typeof (e.dataSeries.visible) === "undefined" || e.dataSeries.visible) {
+                                    e.dataSeries.visible = false;
+                                } else {
+                                    e.dataSeries.visible = true;
+                                }
+                                e.chart.render();
+                            }
+                        },
+                        tooltips: {
+                            enabled: true,
+                            mode: 'label'
+                        },
+                        hover: {
+                            mode: 'label'
+                        },
+                        animation: {
+                            duration: 0
+                        }
+                    }
+                });
+        });
+    }
+    </script>
 {% endblock %}
 {% block content %}
 <section>
     <div class="sensor-container">
         {% for sensor in sensors %}
-            {% set latest = sensor.get_latest() %}
-            <a class="sensor-section" href="/single/{{ sensor.sid }}">
-                <div class="sensor-title">{{ sensor.title }}</div>
-                Updated: {{ sensor.updated|strftime }}<br>
-                {% for field in latest %}
-                    {{ field.display_name }}: {{ field.readings[0].value }}{{ field.unit }}<br>
-                {% endfor %}
-            </a>
+            {% for field in sensor.get_latest() %}
+                <div class="sensor-section field-{{ field.fid }}">
+                    {% if field.icon != "None" %}
+                    <div class="sensor-left"><i class="fa fa-2x {{ field.icon }}"></i></div>
+                    {% endif %}
+                    <div class="sensor-center">
+                        <div class="sensor-title">{{ sensor.title }} {{ field.display_name }}</div>
+                        <div class="sensor-title">{{ field.readings[0].value }}{{ field.unit }}</div>
+                        <div class="sensor-about">{{ sensor.updated|strftime }}</div>
+                    </div>
+                    <div class="sensor-right">
+                        <a href="/single/{{ sensor.sid }}"><i class="fa fa-link"></i></a><br>
+                        <a href="#" onclick="toggle({{ field.fid }},this)"><i class="fa fa-line-chart"></i></a>
+                    </div>
+                </div>
+            {% endfor %}
         {% endfor %}
     </div>
+</section>
+<section>
+<canvas id="graph" width="400" height="150"></canvas>
 </section>
 {% endblock%}

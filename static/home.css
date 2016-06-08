@@ -3,21 +3,41 @@
     flex-wrap: wrap;
 }
 .sensor-section {
+    /* Shape */
     flex: 1;
     max-width: 250px;
     min-width: 200px;
     margin: 10px;
     padding: 10px;
+
+    /* Shape of content */
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: center;
+    align-items: center;
+
+    /* Styling */
     text-align: center;
     text-decoration: none;
     background-color: #699E00;
     color: #FFF;
     border-radius: 3px;
 }
-.sensor-section:hover {
-    opacity: 0.95;
-}
 
-.sensor-title {
-    font-size: 2em;
+.sensor-left {
+    flex-grow: 1;
+    flex-shrink: 0;
 }
+.sensor-center {  flex-grow: 4;  }
+.sensor-right {  flex-grow: 0.5;  }
+.sensor-right a{
+    color: #FFF;
+    padding: 5px;
+    font-size: 1.25em;
+}
+.sensor-right a:hover, .sensor-right a.pushed {
+    opacity: 0.5;
+}
+.sensor-title {  font-size: 1.25em;  }
+.sensor-about {  font-size: 0.75em;  }

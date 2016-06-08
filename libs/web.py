@@ -2,6 +2,7 @@ import cherrypy,  json, datetime, sqlite3, time
 from jinja2 import Environment, FileSystemLoader
 
 from libs.fields import Field
+from libs.graphs import Graph
 
 class WebRoot(object):
 
@@ -46,7 +47,6 @@ class WebRoot(object):
     def single(self, *args, **kwargs):
         start = time.time()
         if len(args) != 1: raise cherrypy.HTTPRedirect("/index")
-        sensor = self.core.sensors.get(int(args[0]))
 
         # Get settings from kwargs
         settings = {"group": "15M", "range": "24"}
@@ -54,46 +54,22 @@ class WebRoot(object):
             arg = arg.split("_")
             settings.update({arg[0]: value})
 
-        if sensor:
-            # Group by
-            group_by = "15M"
-            group_labels = "%H:%M"
-            if settings["group"]:
-                group_by = settings["group"]
-                ttime = (2208989361.0 + datetime.datetime.strptime(group_by[:-1], "%" + group_by[-1]).timestamp()) / 60.0
-                if ttime >= 525600: group_labels = "%Y"
-                elif ttime >= 1440: group_labels = "%d.%m"
-            else:
-                settings["group"] = "15M"
+        range = 60 * 60 * 24
+        if settings["range"]:
+            range = 60 * 60 * int(settings["range"])
+        else:
+            settings["range"] = "24"
 
-            # In range
-            range = 60 * 60 * 24
-            if settings["range"]:
-                range = 60 * 60 * int(settings["range"])
-            else:
-                settings["range"] = "24"
+        # Get fields ids from sensor
+        fids = []
+        sensor = self.core.sensors.get(int(args[0]))
+        for field in sensor.get_fields():
+            fids.append(field.fid)
 
-            # Read all readings
-            datasets = []
-            fields = sensor.get_readings(range, group_by)
-            labels = {}
-            for field in fields:
-                dataset = {"label": field.display_name, "data": [], "fill": False, "borderColor": field.color}
-                for reading in field.readings:
-                    dataset["data"].append(reading.value)
-                    labels[datetime.datetime.fromtimestamp(reading.updated).strftime(group_labels)] = None
-                datasets.append(dataset)
+        # Generate data
+        data = Graph.generate(fids,settings["group"],range)
 
-            # Create data for chart
-            data = {
-                "sid": sensor.sid,
-                "data": {
-                    "labels": list(labels.keys()),
-                    "datasets": datasets
-                }
-            };
-
-            return self.env.get_template('single.html').render(sensor=sensor, settings=settings, data=json.dumps(data))+self.bench(start)
+        return self.env.get_template('single.html').render(sensor=sensor, settings=settings, data=json.dumps(data))+self.bench(start)
 
     @cherrypy.expose
     def sensors(self, *args, **kwargs):
@@ -151,24 +127,73 @@ class WebRoot(object):
         return self.env.get_template('sensors.html').render(sensors=self.core.sensors.sensors)+self.bench(start)
 
     @cherrypy.expose
-    def api(self, *args, **kwargs):
+    def graph(self, *args):
         # Check if user supplied correct amount of arguments
-        if len(args) != 2:
-            return json.dumps({"error": 100, "message": "Not enough arguments, i need token and sensorid"})
+        if len(args) >= 1:
+            return json.dumps({"error": 100, "message": "Not enough arguments, i need at least one field id"})
 
-        # Check if sensor with that id exist
-        sensor = self.core.sensors.get(int(args[1]))
-        if not sensor:
-            return json.dumps({"error": 101, "message": "Sensor with that id does not exist"})
+        fields = []
+        for fid in args:
+            fields.append(Field.get(fid=int(fid)))
 
-        # Check if token is correct
-        if sensor.token != args[0]:
-            return json.dumps({"error": 102, "message": "Wrong token"})
 
-        # Update sensor
-        try:
-            for field, value in kwargs.items():
-                sensor.add_reading(field,float(value))
-        except ValueError:
-            return json.dumps({"error": 103, "message": "Parsing url error, make sure that all fields are floats"})
-        return json.dumps({"success": 1, "message": "Sensor updated"})
+    @cherrypy.expose
+    def api(self, *raw_args, **kwargs):
+
+        # Get arguments
+        args = {}
+        for arg in raw_args:
+            arg = arg.split(",")
+            args[arg[0]] = arg[1]
+
+        if not "action" in args:
+            return json.dumps({"code": 100, "message": "action argument is needed"})
+
+        # Add new readings
+        if args["action"] == "append":
+            # Check if there are needed values
+            if not "sensorid" in args:
+                return json.dumps({"code": 100, "message": "sensorid argument is needed"})
+
+            # Check if there is sensor with that id
+            sensor = self.core.sensors.get(int(args["sensorid"]))
+            if sensor is None:
+                return json.dumps({"code": 101, "message": "Sensor with that id does not exist"})
+
+            # Check if token exist and is correct
+            if not "token" in args or sensor.token != args["token"]:
+                return json.dumps({"code": 102, "message": "Wrong token"})
+
+            # Update sensor
+            try:
+                for field, value in kwargs.items():
+                    sensor.add_reading(field,float(value))
+            except ValueError:
+                return json.dumps({"code": 103, "message": "Parsing url error, make sure that all fields are floats"})
+            return json.dumps({"code": 1, "message": "Sensor updated"})
+
+        # Get chart data for fields
+        elif args["action"] == "chart":
+            # Get all field ids
+            if not "fields" in kwargs:
+                return json.dumps({"code": 100, "message": "fields argument is needed"})
+
+            fids = []
+            for fid in kwargs["fields"].split(","):
+                fids.append(int(fid))
+
+            # Get settings from kwargs
+            settings = {"group": "15M", "range": "24"}
+            if "group" in kwargs:
+                settings["group"] = kwargs["group"]
+            if "range" in kwargs:
+                settings["range"] = kwargs["range"]
+
+            range = 60 * 60 * 24
+            if settings["range"]:
+                range = 60 * 60 * int(settings["range"])
+            else:
+                settings["range"] = "24"
+
+            # Generate data
+            return json.dumps(Graph.generate(fids, settings["group"], range))

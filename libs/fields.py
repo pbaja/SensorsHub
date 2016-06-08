@@ -67,7 +67,7 @@ class Field(object):
             else:
                 return None
 
-    @staticmethod
+    @classmethod
     def create(sid, name):
         """Create new field in database and return it"""
         with sqlite3.connect("db.sqlite") as conn:
@@ -98,17 +98,17 @@ class Field(object):
                     "SELECT fid, updated, AVG(value) FROM readings WHERE sid=? AND fid=? AND updated > ? "
                     "GROUP BY strftime(?,datetime(updated, 'unixepoch'))+strftime(?,datetime(updated, 'unixepoch'))/? "
                     "ORDER BY updated",
-                    [self.sid, self.fid, updated, group_add, '%' + group_minutes[-1], group_minutes[:-1]])
+                    [self.sid, self.fid, updated, group_add, '%' + group_minutes[-1], group_minutes[:-1]]).fetchall()
             # Otherwise, get all readings withouth averaging
             else:
                 results = conn.execute(
                     "SELECT fid, updated, value FROM readings WHERE sid=? AND fid=? AND updated > ?;",
-                    [self.sid, self.fid, updated])
+                    [self.sid, self.fid, updated]).fetchall()
 
             # Create readings from results
             readings = []
             for result in results:
-                readings.append(Reading(self.sid, result[0], result[1], result[2]))
+                readings.append(Reading(self.sid, result[0], result[1], round(result[2],2)))
             self.readings = readings
             return readings
 
