@@ -19,13 +19,17 @@
             $(elem).removeClass("pushed");
         }
 
-        if (fids.length) updateChart();
+        if(chart) chart.destroy();
+        if (fids.length) {
+            updateChart();
+        }
     }
 
     function updateChart() {
+        $(".graph-container").html('<div class="loading"><i class="fa fa-refresh fa-spin fa-2x fa-fw"></i><br>Loading graph</div>');
         $.getJSON("/api/action,chart",{"fields": fids.join(",")},function(data) {
-            if(chart) chart.destroy();
-
+            $(".graph-container").html('<canvas id="graph" width="400" height="150"></canvas>');
+            console.log("Appended");
             chart = new Chart($("#graph"), {
                     type: 'line',
                     data: data,
@@ -82,7 +86,5 @@
         {% endfor %}
     </div>
 </section>
-<section>
-<canvas id="graph" width="400" height="150"></canvas>
-</section>
+<section class="graph-container"></section>
 {% endblock%}

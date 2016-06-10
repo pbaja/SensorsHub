@@ -196,4 +196,5 @@ class WebRoot(object):
                 settings["range"] = "24"
 
             # Generate data
-            return json.dumps(Graph.generate(fids, settings["group"], range))
+            data = Graph.generate(fids, settings["group"], range, sensor_label = True, sensors=self.core.sensors)
+            return json.dumps(data)

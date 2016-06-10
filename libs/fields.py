@@ -67,7 +67,7 @@ class Field(object):
             else:
                 return None
 
-    @classmethod
+    @staticmethod
     def create(sid, name):
         """Create new field in database and return it"""
         with sqlite3.connect("db.sqlite") as conn:

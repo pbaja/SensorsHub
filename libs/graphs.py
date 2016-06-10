@@ -4,7 +4,7 @@ from libs.fields import Field
 class Graph(object):
 
     @staticmethod
-    def generate(field_ids, group_by="15M", range=60 * 60 * 24):
+    def generate(field_ids, group_by="15M", range=60*60*24, sensor_label=False, sensors=None):
 
         # Group by
         group_labels = "%H:%M"
@@ -34,7 +34,11 @@ class Graph(object):
         # Generate datasets
         datasets = []
         for field in fields:
-            dataset = {"label": field.display_name, "data": [], "fill": False, "borderColor": field.color}
+            label = field.display_name
+            #TODO Do it better :P
+            if sensor_label: label = sensors.get(sid=field.sid).title + " " + label
+
+            dataset = {"label": label, "data": [], "fill": False, "borderColor": field.color}
             for reading in field.readings:
                 dataset["data"].append(reading.value)
             datasets.append(dataset)

@@ -41,3 +41,7 @@
 }
 .sensor-title {  font-size: 1.25em;  }
 .sensor-about {  font-size: 0.75em;  }
+
+.loading {
+    text-align: center;
+}

@@ -52,18 +52,28 @@ class Sensor(object):
 
     def get_latest(self):
         """Get latest values from all fields"""
+        print("Getting latest for {}".format(self.title))
         with sqlite3.connect("db.sqlite") as conn:
+            '''
             results = conn.execute("SELECT m1.* FROM readings m1 "
                                    "LEFT JOIN readings m2 "
                                    "ON (m1.fid=m2.fid AND m1.updated<m2.updated) "
                                    "WHERE m2.fid IS NULL AND m1.sid=?",[self.sid]).fetchall()
-
+            print("Got data")
             fields = []
             for result in results:
                 field = Field.get(fid=result[1])
                 if field:
                     field[0].readings.append(Reading(self.sid,result[1],result[2],result[3]))
                     fields.append(field[0])
+            print("Returning")
+            '''
+            fields = self.get_fields()
+            for field in fields:
+                results = conn.execute("SELECT updated, value FROM fields WHERE fid=? ORDER BY updated LIMIT 1", [field.fid]).fetchall()
+                if len(results) > 0:
+                    result = results[0]
+                    field.readings.append(Reading(self.sid,field.fid,result[0],result[1]))
             return fields
 
     def get_fields(self):
