@@ -24,13 +24,17 @@ class Account():
             return True
         return False
 
-    def update(self):
+    def commit(self):
         """Send user information to database"""
         with sqlite3.connect("db.sqlite") as conn:
             values = [self.password,self.lastlogin,self.session,self.email, self.uid]
             conn.execute("UPDATE accounts SET password=?, lastlogin=?, session=?, email=? WHERE uid=?",values)
             return True
         return False
+
+    @staticmethod
+    def hash_password(password):
+        return pbkdf2_sha256.encrypt(password)
 
 class Accounts(object):
 
@@ -68,7 +72,7 @@ class Accounts(object):
 
         # Check if user exist
         with sqlite3.connect("db.sqlite") as conn:
-            result = conn.execute("SELECT uid, password FROM accounts WHERE user=?;", [user]).fetchall()
+            result = conn.execute("SELECT uid, password, email FROM accounts WHERE user=?;", [user]).fetchall()
             if len(result) > 0:
                 result = result[0]
                 # Verify password
@@ -77,7 +81,8 @@ class Accounts(object):
                     account = Account(result[0],user, result[1])
                     account.session = ''.join([random.choice(string.ascii_letters + string.digits) for n in range(32)])
                     account.lastlogin = int(time.time())
-                    account.update()
+                    account.email = result[2]
+                    account.commit()
                     self.accounts.append(account)
                     # Create cookies
                     cherrypy.response.cookie["user"] = account.user
@@ -99,12 +104,13 @@ class Accounts(object):
             return account
         return None
 
-    def logout_user(self):
-        account = self.verify_user()
+    def logout_user(self, account=None):
+        if account is None:
+            account = self.verify_user()
         if account:
             # Remove user sesion key
             account.session = ""
-            account.update()
+            account.commit()
             # Remove user from list
             self.accounts.remove(account)
             # Reset session key
@@ -116,9 +122,11 @@ class Accounts(object):
 
     def protect(self):
         """Use this function, when you want users to log in before accessing page"""
-        if not self.verify_user():
+        account = self.verify_user()
+        if not account:
             cherrypy.serving.response.headers['www-authenticate'] = 'Basic realm="Please login"'
             raise cherrypy.HTTPError(401, "You are not authorized to access that resource")
+        return account
 
     def verify_user(self):
         user = cherrypy.request.cookie.get("user")

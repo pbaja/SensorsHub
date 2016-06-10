@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block head %}
+    {{ super() }}
+{% endblock %}
+{% block content %}
+<section>
+    <h2>Your Account</h2>
+    <form action="/settings/" method="POST">
+        <table>
+            <tr><td>Username:</td><td><input type="text" disabled="1" value="{{ account.user }}"/></td></tr>
+            <tr><td>Password:</td><td><input type="password" name="password" placeholder="New password"/></td></tr>
+            <tr><td></td><td><input type="password" name="password_repeat" placeholder="Repeat password"/></td></tr>
+            <tr><td>Email:</td><td><input type="email" name="email" value="{{ account.email }}" /></td></tr>
+        </table>
+        <input class="button" type="submit" name="update_account" value="Update" />
+    </form>
+</section>
+{% endblock%}

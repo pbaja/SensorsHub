@@ -3,6 +3,7 @@ from jinja2 import Environment, FileSystemLoader
 
 from libs.fields import Field
 from libs.graphs import Graph
+from libs.accounts import Account
 
 class WebRoot(object):
 
@@ -45,6 +46,7 @@ class WebRoot(object):
 
     @cherrypy.expose
     def single(self, *args, **kwargs):
+        """This page is displaying fields and graphs from all fields for given sensor"""
         start = time.time()
         if len(args) != 1: raise cherrypy.HTTPRedirect("/index")
 
@@ -73,6 +75,7 @@ class WebRoot(object):
 
     @cherrypy.expose
     def sensors(self, *args, **kwargs):
+        """This page allows you to configure and create sensors"""
         start = time.time()
         self.core.accounts.protect()
 
@@ -127,18 +130,34 @@ class WebRoot(object):
         return self.env.get_template('sensors.html').render(sensors=self.core.sensors.sensors)+self.bench(start)
 
     @cherrypy.expose
-    def graph(self, *args):
-        # Check if user supplied correct amount of arguments
-        if len(args) >= 1:
-            return json.dumps({"error": 100, "message": "Not enough arguments, i need at least one field id"})
+    def settings(self, *args, **kwargs):
+        """Settings"""
+        start = time.time()
+        account = self.core.accounts.protect()
 
-        fields = []
-        for fid in args:
-            fields.append(Field.get(fid=int(fid)))
+        if "update_account" in kwargs:
+            if kwargs["password"] != kwargs["password_repeat"]:
+                return self.env.get_template('settings.html').render(msg="Passwords does not match",
+                                                                     account=account) + self.bench(start)
+            if kwargs["password"] != "": account.password = Account.hash_password(kwargs["password"])
+            account.email = kwargs["email"]
+            account.commit()
+            self.core.accounts.logout_user(account)
+            return self.env.get_template('settings.html').render(msg="Account updated",account=account) + self.bench(start)
 
+        return self.env.get_template('settings.html').render(account=account)+self.bench(start)
+
+    @cherrypy.expose
+    def log(self):
+        return self.env.get_template('log.html').render()
+
+    @cherrypy.expose
+    def about(self):
+        return self.env.get_template('about.html').render()
 
     @cherrypy.expose
     def api(self, *raw_args, **kwargs):
+        """API"""
 
         # Get arguments
         args = {}
