@@ -70,7 +70,7 @@ class Sensor(object):
             '''
             fields = self.get_fields()
             for field in fields:
-                results = conn.execute("SELECT updated, value FROM fields WHERE fid=? ORDER BY updated LIMIT 1", [field.fid]).fetchall()
+                results = conn.execute("SELECT updated, value FROM readings WHERE fid=? ORDER BY updated LIMIT 1", [field.fid]).fetchall()
                 if len(results) > 0:
                     result = results[0]
                     field.readings.append(Reading(self.sid,field.fid,result[0],result[1]))
