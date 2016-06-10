@@ -7,13 +7,13 @@ from libs.readings import Reading
 class Field(object):
     """Class containing one field"""
 
-    def __init__(self, sid, fid, name, unit, display_name, style):
+    def __init__(self, sid, fid, name, unit, display_name, style, updated):
         """Creates new field from arguments"""
         self.sid = sid
         self.fid = fid
         self.name = name
         self.unit = unit
-        self.updated = None
+        self.updated = updated
         self.value = None
         self.readings = []
 
@@ -22,8 +22,8 @@ class Field(object):
         else:
             self.display_name = name
 
-        self.icon = None
-        self.color = None
+        self.icon = ""
+        self.color = ""
         if style:
             style = style.split("#")
             if len(style) > 0:
@@ -58,11 +58,11 @@ class Field(object):
             values.append(name)
 
         with sqlite3.connect("db.sqlite") as conn:
-            results = conn.execute("SELECT sid, fid, name, unit, display_name, style FROM fields WHERE " + " AND ".join(where),values).fetchall()
+            results = conn.execute("SELECT sid, fid, name, unit, display_name, style, updated FROM fields WHERE " + " AND ".join(where),values).fetchall()
             if len(results) > 0:
                 fields = []
                 for result in results:
-                    fields.append(Field(result[0], result[1], result[2], result[3], result[4], result[5]))
+                    fields.append(Field(result[0], result[1], result[2], result[3], result[4], result[5], result[6]))
                 return fields
             else:
                 return None
@@ -72,7 +72,7 @@ class Field(object):
         """Create new field in database and return it"""
         with sqlite3.connect("db.sqlite") as conn:
             result = conn.execute("INSERT INTO fields (sid, name) VALUES (?,?);", [sid, name])
-            return Field(sid, result.lastrowid, name, None, name, None)
+            return Field(sid, result.lastrowid, name, "", name, "", time.time())
 
     def get_readings(self, delta=0, group_minutes="1S"):
         """Returns array with readings associated with this field (also stores them in field.readings)"""
@@ -118,3 +118,10 @@ class Field(object):
             conn.execute("UPDATE fields SET name=?, unit=?, updated=?, value=?, display_name=?, style=? WHERE fid=?",
                          [self.name, self.unit, self.updated, self.value, self.display_name, "{}{}".format(self.icon, self.color), self.fid])
             return True
+
+    def last_update(self):
+        """Returns seconds from last update"""
+        if self.updated is not None:
+            return time.time() - self.updated
+        else:
+            return 0

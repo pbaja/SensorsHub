@@ -2,6 +2,7 @@
 {% block head %}
     {{ super() }}
     <link rel="stylesheet" media="all" href="/static/home.css"/>
+    <link rel="stylesheet" media="all" href="/static/hint.css"/>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.1.4/Chart.min.js"></script>
     <script>
@@ -75,7 +76,16 @@
                     <div class="sensor-center">
                         <div class="sensor-title">{{ sensor.title }} {{ field.display_name }}</div>
                         <div class="sensor-title">{{ field.readings[0].value }}{{ field.unit }}</div>
-                        <div class="sensor-about">{{ sensor.updated|strftime }}</div>
+                        {% if field.last_update() > 86400 %}
+                            <div class="sensor-about hint--bottom" aria-label="Updated more than 24h ago">
+                                {{ field.updated|strftime }}
+                                <i class="fa warn fa-exclamation-circle"></i>
+                            </div>
+                        {% else %}
+                            <div class="sensor-about">
+                                {{ field.updated|strftime }}
+                            </div>
+                        {% endif %}
                     </div>
                     <div class="sensor-right">
                         <a href="/single/{{ sensor.sid }}"><i class="fa fa-link"></i></a><br>

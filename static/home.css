@@ -23,6 +23,7 @@
     background-color: #699E00;
     color: #FFF;
     border-radius: 3px;
+    cursor: default;
 }
 
 .sensor-left {
@@ -44,4 +45,16 @@
 
 .loading {
     text-align: center;
+}
+
+/* The animation code */
+@keyframes example {
+    0%  {color: #FFF;}
+    50%   {color: #F00;}
+    100%  {color: #FFF;}
+}
+.warn {
+    animation-name: example;
+    animation-duration: 1s;
+    animation-iteration-count: infinite;
 }

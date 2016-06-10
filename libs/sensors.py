@@ -38,8 +38,11 @@ class Sensor(object):
             else:
                 field = field[0]
 
-            # Refresh sensor update timestamp
+            # Refresh sensor updated timestamp
             conn.execute("UPDATE sensors SET updated=? WHERE sid=?", [int(time.time()), self.sid])
+
+            # Refresh field updated timestamp
+            conn.execute("UPDATE fields SET updated=? WHERE fid=?", [int(time.time()), field.fid])
 
             # Add reading to database
             conn.execute("INSERT INTO readings (sid, fid, updated, value) VALUES (?,?,?,?);",
@@ -52,22 +55,7 @@ class Sensor(object):
 
     def get_latest(self):
         """Get latest values from all fields"""
-        print("Getting latest for {}".format(self.title))
         with sqlite3.connect("db.sqlite") as conn:
-            '''
-            results = conn.execute("SELECT m1.* FROM readings m1 "
-                                   "LEFT JOIN readings m2 "
-                                   "ON (m1.fid=m2.fid AND m1.updated<m2.updated) "
-                                   "WHERE m2.fid IS NULL AND m1.sid=?",[self.sid]).fetchall()
-            print("Got data")
-            fields = []
-            for result in results:
-                field = Field.get(fid=result[1])
-                if field:
-                    field[0].readings.append(Reading(self.sid,result[1],result[2],result[3]))
-                    fields.append(field[0])
-            print("Returning")
-            '''
             fields = self.get_fields()
             for field in fields:
                 results = conn.execute("SELECT updated, value FROM readings WHERE fid=? ORDER BY updated LIMIT 1", [field.fid]).fetchall()
@@ -79,10 +67,10 @@ class Sensor(object):
     def get_fields(self):
         """Returns list of fields without readings"""
         with sqlite3.connect("db.sqlite") as conn:
-            results = conn.execute("SELECT sid, fid, name, unit, display_name, style FROM fields WHERE sid=?",[self.sid]).fetchall()
+            results = conn.execute("SELECT sid, fid, name, unit, display_name, style, updated FROM fields WHERE sid=?",[self.sid]).fetchall()
             fields = []
             for result in results:
-                fields.append(Field(result[0],result[1],result[2],result[3],result[4], result[5]))
+                fields.append(Field(result[0],result[1],result[2],result[3],result[4], result[5], result[6]))
             return fields
 
     def get_readings(self, delta=0, group_minutes="1S"):
@@ -99,6 +87,9 @@ class Sensor(object):
                          [self.updated, self.token, self.title, self.description, self.sid])
             return True
 
+    def last_update(self):
+        """Returns seconds from last update"""
+        return time.time()-self.updated
 
 class Sensors(object):
     """Class containing all sensors"""
@@ -152,11 +143,3 @@ class Sensors(object):
         for sensor in self.sensors:
             readings[sensor.sid] = sensor.get_readings(delta, group_minutes)
         return readings
-
-    def add_reading(self, sid, name, value):
-        """Adds reading into database"""
-        sensor = self.get(sid)
-        if sensor:
-            sensor.update(name, value)
-            return True
-        return False
