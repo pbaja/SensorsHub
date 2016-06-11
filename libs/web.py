@@ -83,10 +83,10 @@ class WebRoot(object):
             if kwargs["action"] == "remove":
                 if self.core.sensors.remove(int(kwargs["sid"])):
                     return self.env.get_template('sensors.html').render(sensors=self.core.sensors.sensors,
-                                                                        msg="Sensor removed")+self.bench(start)
+                                                                        success="Sensor removed")+self.bench(start)
                 else:
                     return self.env.get_template('sensors.html').render(sensors=self.core.sensors.sensors,
-                                                                    msg="Failed to remove sensor")+self.bench(start)
+                                                                    error="Failed to remove sensor")+self.bench(start)
 
             elif kwargs["action"] == "update_field":
                 field = Field.get(fid=int(kwargs["fid"]))[0]
@@ -96,36 +96,36 @@ class WebRoot(object):
                 field.color = kwargs["color"]
                 field.commit()
                 return self.env.get_template('sensors.html').render(sensors=self.core.sensors.sensors,
-                                                                        msg="Field updated")+self.bench(start)
+                                                                        success="Field updated")+self.bench(start)
 
             elif kwargs["action"] == "remove_field":
                 if Field.remove(int(kwargs["fid"])):
                     return self.env.get_template('sensors.html').render(sensors=self.core.sensors.sensors,
-                                                                        msg="Field removed")+self.bench(start)
+                                                                        success="Field removed")+self.bench(start)
                 else:
                     return self.env.get_template('sensors.html').render(sensors=self.core.sensors.sensors,
-                                                                        msg="Failed to remove field")+self.bench(start)
+                                                                        error="Failed to remove field")+self.bench(start)
 
             elif kwargs["action"] == "regen":
                 sensor = self.core.sensors.get(int(kwargs["sid"]))
                 if sensor and sensor.set_token():
                     return self.env.get_template('sensors.html').render(sensors=self.core.sensors.sensors,
-                                                                        msg="Token regenerated")+self.bench(start)
+                                                                        success="Token regenerated")+self.bench(start)
                 else:
                     return self.env.get_template('sensors.html').render(sensors=self.core.sensors.sensors,
-                                                                        msg="Failed to regenerate token")+self.bench(start)
+                                                                        error="Failed to regenerate token")+self.bench(start)
 
-            elif kwargs["action"].lower() == "add":
+            elif kwargs["action"] == "add":
                 try:
-                    if self.core.sensors.add(int(kwargs["sid"]),None, kwargs["title"], kwargs["description"]):
+                    if self.core.sensors.add(int(kwargs["sid"]),kwargs["token"], kwargs["title"], kwargs["description"]):
                         return self.env.get_template('sensors.html').render(sensors=self.core.sensors.sensors,
-                                                                            msg="Sensor added")+self.bench(start)
+                                                                            success="Sensor added")+self.bench(start)
                     else:
                         return self.env.get_template('sensors.html').render(sensors=self.core.sensors.sensors,
-                                                                            msg="Failed to add sensor")+self.bench(start)
+                                                                            error="Failed to add sensor")+self.bench(start)
                 except sqlite3.IntegrityError:
                     return self.env.get_template('sensors.html').render(sensors=self.core.sensors.sensors,
-                                                                        msg="Sensor with that ID already exist")+self.bench(start)
+                                                                        error="Sensor with that ID already exist")+self.bench(start)
 
         return self.env.get_template('sensors.html').render(sensors=self.core.sensors.sensors)+self.bench(start)
 
@@ -137,13 +137,13 @@ class WebRoot(object):
 
         if "update_account" in kwargs:
             if kwargs["password"] != kwargs["password_repeat"]:
-                return self.env.get_template('settings.html').render(msg="Passwords does not match",
+                return self.env.get_template('settings.html').render(error="Passwords does not match",
                                                                      account=account) + self.bench(start)
             if kwargs["password"] != "": account.password = Account.hash_password(kwargs["password"])
             account.email = kwargs["email"]
             account.commit()
             self.core.accounts.logout_user(account)
-            return self.env.get_template('settings.html').render(msg="Account updated",account=account) + self.bench(start)
+            return self.env.get_template('settings.html').render(success="Account updated",account=account) + self.bench(start)
 
         return self.env.get_template('settings.html').render(account=account)+self.bench(start)
 

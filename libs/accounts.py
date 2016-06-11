@@ -66,7 +66,7 @@ class Accounts(object):
             else:
                 # No? Well, logout.
                 account.session = ""
-                account.update()
+                account.commit()
                 self.accounts.remove(account)
                 return None
 

@@ -8,7 +8,8 @@
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
 		<link rel="shortcut icon" href="/static/icon.ico">
 		<link rel="stylesheet" media="all" href="/static/base.css"/>
-		<link rel="stylesheet" media="all" href="https://fonts.googleapis.com/css?family=Open+Sans:400,700"/>
+        <link rel="stylesheet" media="all" href="/static/hint.css"/>
+		<link rel="stylesheet" media="all" href="https://fonts.googleapis.com/css?family=Open+Sans:400,600,700"/>
 		{% endblock %}
         <script>
             $(document).ready(function() {
@@ -33,7 +34,9 @@
 					<li class="right"><a href="/sensors">Sensors</a></li>
 				</ul>
 			</header>
-            {% if msg %}<div class="title">{{msg}}</div>{% endif %}
+            {% if msg %}<div class="message">{{msg}}</div>{% endif %}
+            {% if success %}<div class="message success">{{success}}</div>{% endif %}
+            {% if error %}<div class="message error">{{error}}</div>{% endif %}
 			{% block content %}{% endblock %}
 		</div>
 	</body>

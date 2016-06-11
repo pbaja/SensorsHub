@@ -7,41 +7,85 @@
 {% endblock %}
 {% block content %}
 {% for sensor in sensors %}
-    <section class="sensor-section">
-        <div class="sensor-title">{{ sensor.title }} <span class="sensor-description">{{ sensor.description }}</span></div>
-        Sensor ID: {{ sensor.sid }}<br>
-        Token: {{ sensor.token }}<br>
-        Updated: {% if sensor.updated %}{{ sensor.updated | strftime }}{% else %}Never{% endif %}<br>
-        Fields: <br>
+    <section>
+        <div class="title">{{ sensor.title }}</div>
+        <div class="title smaller">{{ sensor.description }}</div>
         <table>
-            <tr><th>Field ID</th><th>Name</th><th>Display name</th><th>Unit</th><th>Icon</th><th>Color</th><th>Actions</th></tr>
-            {% for field in sensor.get_fields() %}
-                <form action="/sensors/" method="POST">
-                    <input type="hidden" name="action" value="update_field"/>
-                    <input type="hidden" name="fid" value="{{ field.fid }}"/>
-                    <tr>
-                        <td>{{ field.fid }}</td>
-                        <td>{{ field.name }}</td>
-                        <td><input type="text" name="display_name" value="{{ field.display_name }}"/></td>
-                        <td><input type="text" name="unit" value="{{ field.unit }}"/></td>
-                        <td><input type="text" name="icon" value="{{ field.icon }}"/></td>
-                        <td><input type="color" name="color" value="{{ field.color }}"/></td>
-                        <td><input class="button" type="submit" value="Update"/><a class="button" href="/sensors/?action=remove_field&fid={{ field.fid }}">Remove</a></td>
-                    <tr>
-                </form>
-            {% endfor %}
+            <tr>
+                <th scope="col">Sensor ID</th>
+                <td><input type="text" disabled="1" value="{{ sensor.sid }}"/></td>
+            </tr>
+            <tr>
+                <th scope="col">Token</th>
+                <td><input type="text" disabled="1" value="{{ sensor.token }}"/></td>
+            </tr>
+            <tr>
+                <th scope="col">Last update</th>
+                <td><input type="text" disabled="1" value="{% if sensor.updated %}{{ sensor.updated | strftime }}{% else %}Never{% endif %}"/></td>
+            </tr>
+            <tr>
+                <th scope="col">Title</th>
+                <td><input name="title" type="text" value="{{ sensor.title }}"/></td>
+            </tr>
+            <tr>
+                <th scope="col">Description</th>
+                <td><input name="description" type="text" value="{{ sensor.description }}"/></td>
+            </tr>
         </table>
-        <a class="button" href="/sensors?sid={{ sensor.sid }}&action=remove">Remove</a>
-        <a class="button" href="/sensors?sid={{ sensor.sid }}&action=regen">Regenerate token</a>
+        {% for field in sensor.get_fields() %}
+            <form action="/sensors/" method="POST">
+                <input type="hidden" name="action" value="update_field"/>
+                <input type="hidden" name="fid" value="{{ field.fid }}"/>
+                <div class="title smaller">Sensor Field</div>
+                <table>
+                    <tr>
+                        <th scope="col">Field ID</th>
+                        <td><input type="text" disabled="1" value="{{ field.fid }}"/></td>
+                    </tr>
+                    <tr>
+                        <th scope="col">Name</th>
+                        <td><input type="text" disabled="1" value="{{ field.name }}"/></td>
+                    </tr>
+                    <tr>
+                        <th scope="col">Display name</th>
+                        <td><input name="display_name" type="text" value="{{ field.display_name }}"/></td>
+                    </tr>
+                    <tr>
+                        <th scope="col">Unit</th>
+                        <td><input name="unit" type="text" value="{{ field.unit }}"/></td>
+                    </tr>
+                    <tr>
+                        <th scope="col">Icon</th>
+                        <td><input name="icon" type="text" value="{{ field.icon }}"/></td>
+                    </tr>
+                    <tr>
+                        <th scope="col">Color</th>
+                        <td><input name="color" type="color" value="{{ field.color }}"/></td>
+                    </tr>
+                    <tr>
+                        <th>Actions</th>
+                        <td>
+                            <a class="button warning smaller" href="/sensors/?action=remove_field&fid={{ field.fid }}">Remove field</a>
+                            <input class="button smaller" type="submit" value="Update field"/>
+                        </td>
+                    </tr>
+                </table>
+            </form>
+        {% endfor %}
+        <div class="title smaller">Actions</div>
+        <a class="button error" href="/sensors?sid={{ sensor.sid }}&action=remove">Remove sensor</a>
+        <a class="button warning" href="/sensors?sid={{ sensor.sid }}&action=regen">Regenerate token</a>
     </section>
 {% endfor %}
-<section class="sensor-section">
-    <div class="sensor-title">Add new</div>
+<section>
+    <div class="title">Add new</div>
     <form action="/sensors/" method="POST">
         <input type="number" name="sid" placeholder="SensorID" />
+        <input type="text" name="token" placeholder="Token" />
         <input type="text" name="title" placeholder="Title" />
         <input type="text" name="description" placeholder="Description" />
-        <input class="Button" type="submit" name="action" value="Add" /><br>
+        <input type="hidden" name="action" value="add" />
+        <input class="Button" type="submit" value="Create sensor" /><br>
     </form>
 </section>
 {% endblock%}

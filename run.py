@@ -70,7 +70,7 @@ class Core(object):
 
         # Create website
         cherrypy.config.update({
-            "server.socket_port": 5000,
+            "server.socket_port": 8083,
             "server.socket_host": "0.0.0.0"
         })
         cherrypy.quickstart(WebRoot(self), "/", {
