@@ -81,13 +81,15 @@ table {
     border-collapse: collapse;
 }
 input:not([type="submit"]):not([type="checkbox"]), select {
-    width: 25em;
     margin: 1px;
     padding: 3px 5px;
     border: 1px solid #BABABA;
     background-color: #FFF;
     outline: 0;
     color: #000;
+}
+input.wide, select.wide {
+    width: 25em;
 }
 input:disabled {
     color: #999 !important;

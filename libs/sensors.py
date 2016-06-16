@@ -105,9 +105,9 @@ class Sensors(object):
             for result in results:
                 self.sensors.append(Sensor(result[0],result[1],result[2],result[3],result[4]))
 
-    def add(self, sid, token=None, title=None, description=None):
+    def add(self, sid, token="", title=None, description=None):
         """Adds new sensor to database"""
-        if token == None: token = ''.join(random.choice(string.ascii_uppercase+string.digits) for _ in range(16))
+        if token == "": token = ''.join(random.choice(string.ascii_uppercase+string.digits) for _ in range(16))
         if title == None: description = "Default title"
         if description == None: description = "Default description"
 
