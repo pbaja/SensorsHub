@@ -11,7 +11,7 @@
 #Name of pid file that will be created, must be unique
 name="sensorshub"
 #Working directory (Needs / at the end)
-directory="/home/skew/ProjektyPython/SensorsHub/"
+directory="$(cd $(dirname $0) && pwd)/"
 #Command to execute (it will be reexecuted when crashed/exited)
 executable="python3 run.py"
 
