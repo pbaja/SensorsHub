@@ -1,7 +1,17 @@
 {% extends "base.html" %}
 {% block head %}
     {{ super() }}
-    <link rel="stylesheet" media="all" href="/static/settings.css"/>
+    <script>
+        confirmed = [];
+        function warn(obj) {
+            if(confirmed.lastIndexOf(obj) !== -1) return true;
+            var msg = "Changing this can result in loosing access to the website. This option is only for advanced users. Are you sure that you want to edit this?";
+            var confirm = window.confirm(msg);
+            if(confirm) confirmed.push(obj);
+            console.log(confirmed);
+            return confirm;
+        }
+    </script>
 {% endblock %}
 {% block content %}
 <section>
@@ -30,6 +40,36 @@
 </section>
 <section>
     <h2>Configuration</h2>
-
+    <form action="/settings/" method="POST">
+        <table>
+            <tr>
+                <th scope="col">Web server host</th>
+                <td><input onkeydown="warn(this)" type="text" name="host" value="{{ config.get("host", "0.0.0.0") }}"/></td>
+            </tr>
+            <tr>
+                <th scope="col">Web server port</th>
+                <td><input onkeydown="warn(this)" type="number" name="port" value="{{ config.get("port", 80) }}"/></td>
+            </tr>
+            <tr>
+                <th scope="col">Use field colors for tiles on home page</th>
+                <td>
+                    <select name="colorize_field_tile">
+                        <option value="0" {% if not config.get("colorize_field_tile", False) %}selected{% endif %}>No</option>
+                        <option value="1" {% if config.get("colorize_field_tile", False) %}selected{% endif %}>Yes</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <th scope="col">Theme</th>
+                <td>
+                    <select name="dark_theme">
+                        <option value="0" {% if not config.get("dark_theme", False) %}selected{% endif %}>Light</option>
+                        <option value="1" {% if config.get("dark_theme", False) %}selected{% endif %}>Dark</option>
+                    </select>
+                </td>
+            </tr>
+        </table>
+        <input class="button" type="submit" name="update_config" value="Update" />
+    </form>
 </section>
 {% endblock%}

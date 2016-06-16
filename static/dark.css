@@ -1,0 +1,22 @@
+html, body {  color: #DDD;  }
+body {  background-color: #333;  }
+header li.header a {  color: #EEE;  }
+header li.right a {  color: #EEE;  }
+header li.right a:hover {  color:#AAA;  }
+
+input:not([type="submit"]):not([type="checkbox"]), select {
+    background-color: #222;
+    border-color: #444;
+    color: #FFF;
+}
+input:disabled {
+    color: #999 !important;
+    border-color: #454545 !important;
+}
+
+.title  {
+    color: #FFF;
+}
+.title.smaller {
+    color: #FFF;
+}

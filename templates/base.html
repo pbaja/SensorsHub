@@ -9,7 +9,9 @@
 		<link rel="shortcut icon" href="/static/icon.ico">
 		<link rel="stylesheet" media="all" href="/static/base.css"/>
         <link rel="stylesheet" media="all" href="/static/hint.css"/>
+        {% if config.get("dark_theme", False) %}<link rel="stylesheet" media="all" href="/static/dark.css"/>{% endif %}
 		<link rel="stylesheet" media="all" href="https://fonts.googleapis.com/css?family=Open+Sans:400,600,700"/>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
 		{% endblock %}
         <script>
             $(document).ready(function() {

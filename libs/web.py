@@ -33,16 +33,18 @@ class WebRoot(object):
 
     @cherrypy.expose
     def index(self):
+        """Home page"""
         start = time.time()
-        return self.env.get_template('home.html').render(sensors=self.core.sensors.sensors)+self.bench(start)
+        return self.env.get_template('home.html').render(sensors=self.core.sensors.sensors, config=self.core.config)+self.bench(start)
 
     @cherrypy.expose
     def logout(self):
+        """Loggnig out, unfortunately browser will immidiately log in you back automatically."""
         start = time.time()
         if self.core.accounts.logout_user():
-            return self.env.get_template('home.html').render(sensors=self.core.sensors.sensors,msg="Logged out")+self.bench(start)
+            return self.env.get_template('home.html').render(sensors=self.core.sensors.sensors,msg="Logged out", config=self.core.config)+self.bench(start)
         else:
-            return self.env.get_template('home.html').render(sensors=self.core.sensors.sensors, msg="Failed to logout")+self.bench(start)
+            return self.env.get_template('home.html').render(sensors=self.core.sensors.sensors, msg="Failed to logout", config=self.core.config)+self.bench(start)
 
     @cherrypy.expose
     def single(self, *args, **kwargs):
@@ -71,7 +73,7 @@ class WebRoot(object):
         # Generate data
         data = Graph.generate(fids,settings["group"],range)
 
-        return self.env.get_template('single.html').render(sensor=sensor, settings=settings, data=json.dumps(data))+self.bench(start)
+        return self.env.get_template('single.html').render(sensor=sensor, settings=settings, data=json.dumps(data), config=self.core.config)+self.bench(start)
 
     @cherrypy.expose
     def sensors(self, *args, **kwargs):
@@ -83,10 +85,10 @@ class WebRoot(object):
             if kwargs["action"] == "remove":
                 if self.core.sensors.remove(int(kwargs["sid"])):
                     return self.env.get_template('sensors.html').render(sensors=self.core.sensors.sensors,
-                                                                        success="Sensor removed")+self.bench(start)
+                                                                        success="Sensor removed", config=self.core.config)+self.bench(start)
                 else:
                     return self.env.get_template('sensors.html').render(sensors=self.core.sensors.sensors,
-                                                                    error="Failed to remove sensor")+self.bench(start)
+                                                                    error="Failed to remove sensor", config=self.core.config)+self.bench(start)
 
             elif kwargs["action"] == "update_field":
                 field = Field.get(fid=int(kwargs["fid"]))[0]
@@ -96,64 +98,73 @@ class WebRoot(object):
                 field.color = kwargs["color"]
                 field.commit()
                 return self.env.get_template('sensors.html').render(sensors=self.core.sensors.sensors,
-                                                                        success="Field updated")+self.bench(start)
+                                                                        success="Field updated", config=self.core.config)+self.bench(start)
 
             elif kwargs["action"] == "remove_field":
                 if Field.remove(int(kwargs["fid"])):
                     return self.env.get_template('sensors.html').render(sensors=self.core.sensors.sensors,
-                                                                        success="Field removed")+self.bench(start)
+                                                                        success="Field removed", config=self.core.config)+self.bench(start)
                 else:
                     return self.env.get_template('sensors.html').render(sensors=self.core.sensors.sensors,
-                                                                        error="Failed to remove field")+self.bench(start)
+                                                                        error="Failed to remove field", config=self.core.config)+self.bench(start)
 
             elif kwargs["action"] == "regen":
                 sensor = self.core.sensors.get(int(kwargs["sid"]))
                 if sensor and sensor.set_token():
                     return self.env.get_template('sensors.html').render(sensors=self.core.sensors.sensors,
-                                                                        success="Token regenerated")+self.bench(start)
+                                                                        success="Token regenerated", config=self.core.config)+self.bench(start)
                 else:
                     return self.env.get_template('sensors.html').render(sensors=self.core.sensors.sensors,
-                                                                        error="Failed to regenerate token")+self.bench(start)
+                                                                        error="Failed to regenerate token", config=self.core.config)+self.bench(start)
 
             elif kwargs["action"] == "add":
                 try:
                     if self.core.sensors.add(int(kwargs["sid"]),kwargs["token"], kwargs["title"], kwargs["description"]):
                         return self.env.get_template('sensors.html').render(sensors=self.core.sensors.sensors,
-                                                                            success="Sensor added")+self.bench(start)
+                                                                            success="Sensor added", config=self.core.config)+self.bench(start)
                     else:
                         return self.env.get_template('sensors.html').render(sensors=self.core.sensors.sensors,
-                                                                            error="Failed to add sensor")+self.bench(start)
+                                                                            error="Failed to add sensor", config=self.core.config)+self.bench(start)
                 except sqlite3.IntegrityError:
                     return self.env.get_template('sensors.html').render(sensors=self.core.sensors.sensors,
-                                                                        error="Sensor with that ID already exist")+self.bench(start)
+                                                                        error="Sensor with that ID already exist", config=self.core.config)+self.bench(start)
 
-        return self.env.get_template('sensors.html').render(sensors=self.core.sensors.sensors)+self.bench(start)
+        return self.env.get_template('sensors.html').render(sensors=self.core.sensors.sensors, config=self.core.config)+self.bench(start)
 
     @cherrypy.expose
     def settings(self, *args, **kwargs):
-        """Settings"""
+        """Settings page"""
         start = time.time()
         account = self.core.accounts.protect()
 
         if "update_account" in kwargs:
             if kwargs["password"] != kwargs["password_repeat"]:
                 return self.env.get_template('settings.html').render(error="Passwords does not match",
-                                                                     account=account) + self.bench(start)
+                                                                     account=account, config=self.core.config) + self.bench(start)
             if kwargs["password"] != "": account.password = Account.hash_password(kwargs["password"])
             account.email = kwargs["email"]
             account.commit()
             self.core.accounts.logout_user(account)
             return self.env.get_template('settings.html').render(success="Account updated",account=account) + self.bench(start)
 
-        return self.env.get_template('settings.html').render(account=account)+self.bench(start)
+        elif "update_config" in kwargs:
+            self.core.config.set("colorize_field_tile", kwargs["colorize_field_tile"] == "1",False)
+            self.core.config.set("dark_theme", kwargs["dark_theme"] == "1",False)
+            self.core.config.set("port", int(kwargs["port"]),False)
+            self.core.config.set("host", kwargs["host"],False)
+            self.core.config.save()
+            return self.env.get_template('settings.html').render(success="Settings updated", account=account,
+                                                                 config=self.core.config) + self.bench(start)
+
+        return self.env.get_template('settings.html').render(account=account, config=self.core.config)+self.bench(start)
 
     @cherrypy.expose
     def log(self):
-        return self.env.get_template('log.html').render()
+        return self.env.get_template('log.html').render(config=self.core.config)
 
     @cherrypy.expose
     def about(self):
-        return self.env.get_template('about.html').render()
+        return self.env.get_template('about.html').render(config=self.core.config)
 
     @cherrypy.expose
     def api(self, *raw_args, **kwargs):
@@ -172,30 +183,30 @@ class WebRoot(object):
         if args["action"] == "append":
             # Check if there are needed values
             if not "sensorid" in args:
-                return json.dumps({"code": 100, "message": "sensorid argument is needed"})
+                return json.dumps({"code": 110, "message": "sensorid argument is needed"})
 
             # Check if there is sensor with that id
             sensor = self.core.sensors.get(int(args["sensorid"]))
             if sensor is None:
-                return json.dumps({"code": 101, "message": "Sensor with that id does not exist"})
+                return json.dumps({"code": 111, "message": "Sensor with that id does not exist"})
 
             # Check if token exist and is correct
             if not "token" in args or sensor.token != args["token"]:
-                return json.dumps({"code": 102, "message": "Wrong token"})
+                return json.dumps({"code": 112, "message": "Wrong token"})
 
             # Update sensor
             try:
                 for field, value in kwargs.items():
                     sensor.add_reading(field,float(value))
             except ValueError:
-                return json.dumps({"code": 103, "message": "Parsing url error, make sure that all fields are floats"})
-            return json.dumps({"code": 1, "message": "Sensor updated"})
+                return json.dumps({"code": 113, "message": "Parsing url error, make sure that all fields are floats"})
+            return json.dumps({"code": 10, "message": "Sensor updated"})
 
         # Get chart data for fields
         elif args["action"] == "chart":
             # Get all field ids
             if not "fields" in kwargs:
-                return json.dumps({"code": 100, "message": "fields argument is needed"})
+                return json.dumps({"code": 120, "message": "fields argument is needed"})
 
             fids = []
             for fid in kwargs["fields"].split(","):

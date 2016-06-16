@@ -6,6 +6,7 @@ import cherrypy
 from libs.accounts import Accounts
 from libs.sensors import Sensors
 from libs.web import WebRoot
+from libs.config import Config
 
 class Core(object):
     def __init__(self):
@@ -61,6 +62,10 @@ class Core(object):
             conn.execute(
                 """CREATE TABLE IF NOT EXISTS accounts(uid INTEGER PRIMARY KEY, session TEXT, user TEXT UNIQUE , password TEXT, lastlogin INTEGER, email TEXT)""")
 
+        # Load config
+        self.config = Config()
+        self.config.load()
+
         # Create and read sensors from database
         self.sensors = Sensors()
         self.sensors.load()
@@ -70,8 +75,8 @@ class Core(object):
 
         # Create website
         cherrypy.config.update({
-            "server.socket_port": 8083,
-            "server.socket_host": "0.0.0.0"
+            "server.socket_port": self.config.get("port", 80),
+            "server.socket_host": self.config.get("host", "0.0.0.0")
         })
         cherrypy.quickstart(WebRoot(self), "/", {
             "/static": {

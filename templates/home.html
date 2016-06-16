@@ -3,7 +3,6 @@
     {{ super() }}
     <link rel="stylesheet" media="all" href="/static/home.css"/>
     <link rel="stylesheet" media="all" href="/static/hint.css"/>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.1.4/Chart.min.js"></script>
     <script>
     var fids = [];
@@ -69,7 +68,7 @@
     <div class="sensor-container">
         {% for sensor in sensors %}
             {% for field in sensor.get_latest() %}
-                <div class="sensor-section field-{{ field.fid }}">
+                <div class="sensor-section field-{{ field.fid }}" {% if config.get("colorize_field_tile", False) %} style="background-color: {{ field.color }}"{% endif %}>
                     {% if field.icon != "None" %}
                     <div class="sensor-left"><i class="fa fa-2x {{ field.icon }}"></i></div>
                     {% endif %}
