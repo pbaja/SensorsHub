@@ -2,11 +2,15 @@
 import os
 import sqlite3
 import cherrypy
+import json
+import datetime
 
+from jinja2 import Environment, FileSystemLoader
 from libs.accounts import Accounts
 from libs.sensors import Sensors
-from libs.web import WebRoot
 from libs.config import Config
+from libs.web import WebRoot
+from libs.settings import WebSettings
 
 class Core(object):
     def __init__(self):
@@ -74,17 +78,39 @@ class Core(object):
         self.accounts = Accounts()
 
         # Create website
+        env = Environment(loader=FileSystemLoader('templates'))
+
+        def to_json(value):
+            return json.dumps(value)
+
+        env.filters["to_json"] = to_json
+
+        def format_datetime(value, format="%d.%m.%Y %H:%M"):
+            if value == None:
+                return "Never"
+            else:
+                try:
+                    return datetime.datetime.fromtimestamp(value).strftime(format)
+                except TypeError:
+                    return value.strftime(format)
+
+        env.filters["strftime"] = format_datetime
+
         cherrypy.config.update({
             "server.socket_port": self.config.get("port", 80),
             "server.socket_host": self.config.get("host", "0.0.0.0")
         })
-        cherrypy.quickstart(WebRoot(self), "/", {
+        cherrypy.tree.mount(WebRoot(self,env),"/", {
             "/static": {
                 "tools.staticdir.root": os.getcwd(),
                 "tools.staticdir.on": True,
                 "tools.staticdir.dir": "static"
             }
         })
+        cherrypy.tree.mount(WebSettings(self, env), "/settings", None)
+        cherrypy.engine.signals.subscribe()
+        cherrypy.engine.start()
+        cherrypy.engine.block()
 
 if __name__ == "__main__":
     Core()

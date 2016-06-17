@@ -1,0 +1,51 @@
+#main {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+}
+
+#sidebar {
+    flex: 1;
+    order: 0;
+}
+#sidebar ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+#sidebar a {
+    display: block;
+    margin: 2px;
+    padding: 5px 10px;
+    color: #666;
+    text-decoration: none;
+    font-weight: bold;
+    border-left: 2px solid #555;
+}
+#sidebar a:hover {
+    color: #888;
+    border-left-color: #0AF;
+}
+#container {
+    flex: 10;
+    order: 1;
+}
+
+@media (min-width: 768px) {
+    #main {
+        flex-direction: row;
+    }
+    #sidebar {
+        min-width: 250px;
+    }
+}
+
+.sensors-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 5px;
+}
+.sensors-table td {
+    background-color: #BBB;
+    padding: 5px;
+}

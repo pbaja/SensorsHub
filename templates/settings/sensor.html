@@ -1,0 +1,101 @@
+{% extends "settings/base.html" %}
+{% block head %}
+    {{ super() }}
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.1.4/Chart.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            $(".show-warn-msg").click(function(event){
+                var msg = "Are you sure that you want to do this? THIS CANNOT BE UNDONE! BE CAREFUL.";
+                if(window.confirm(msg)) {
+                    return true;
+                } else {
+                    event.stopPropagation();
+                    return false;
+                }
+            });
+        });
+    </script>
+{% endblock %}
+{% block content %}
+<section>
+    <form action="/settings/sensor/" method="POST">
+        <input type="hidden" name="action" value="update_sensor"/>
+        <input type="hidden" name="sid" value="{{ sensor.sid }}"/>
+        <h2>Sensor settings</h2>
+        <table>
+            <tr>
+                <th scope="col">Sensor ID</th>
+                <td><input class="wide" type="text" disabled="1" value="{{ sensor.sid }}"/></td>
+            </tr>
+            <tr>
+                <th scope="col">Token</th>
+                <td><input class="wide" type="text" disabled="1" value="{{ sensor.token }}"/></td>
+            </tr>
+            <tr>
+                <th scope="col">Last update</th>
+                <td><input class="wide" type="text" disabled="1" value="{% if sensor.updated %}{{ sensor.updated | strftime }}{% else %}Never{% endif %}"/></td>
+            </tr>
+            <tr>
+                <th scope="col">Title</th>
+                <td><input class="wide" name="title" type="text" value="{{ sensor.title }}"/></td>
+            </tr>
+            <tr>
+                <th scope="col">Description</th>
+                <td><input class="wide" name="description" type="text" value="{{ sensor.description }}"/></td>
+            </tr>
+            <tr>
+                <th>Actions</th>
+                <td>
+                    <input class="button smaller" type="submit" value="Update sensor"/>
+                    <a class="show-warn-msg button smaller warning" href="/settings/sensor?sid={{ sensor.sid }}&action=regen">Regenerate token</a>
+                    <a class="show-warn-msg button smaller error" href="/settings/sensor?sid={{ sensor.sid }}&action=remove">Remove sensor</a>
+                </td>
+            </tr>
+        </table>
+    </form>
+</section>
+{% for field in sensor.get_fields() %}
+<section>
+    <form action="/settings/sensor/" method="POST">
+        <input type="hidden" name="action" value="update_field"/>
+        <input type="hidden" name="sid" value="{{ sensor.sid }}"/>
+        <input type="hidden" name="fid" value="{{ field.fid }}"/>
+        <h2>Sensor Field</h2>
+        <table>
+            <tr>
+                <th scope="col">Field ID</th>
+                <td><input class="wide" type="text" disabled="1" value="{{ field.fid }}"/></td>
+            </tr>
+            <tr>
+                <th scope="col">Name</th>
+                <td><input class="wide" type="text" disabled="1" value="{{ field.name }}"/></td>
+            </tr>
+            <tr>
+                <th scope="col">Display name</th>
+                <td><input class="wide" name="display_name" type="text" value="{{ field.display_name }}"/></td>
+            </tr>
+            <tr>
+                <th scope="col">Unit</th>
+                <td><input class="wide" name="unit" type="text" value="{{ field.unit }}"/></td>
+            </tr>
+            <tr>
+                <th scope="col">Icon</th>
+                <td><input class="wide" name="icon" type="text" value="{{ field.icon }}"/></td>
+            </tr>
+            <tr>
+                <th scope="col">Color</th>
+                <td><input class="wide" name="color" type="color" value="{{ field.color }}"/></td>
+            </tr>
+            <tr>
+                <th>Actions</th>
+                <td>
+                    <input class="button smaller" type="submit" value="Update field"/>
+                    <a class="show-warn-msg button warning smaller" href="/sensors/?action=remove_field&fid={{ field.fid }}">Remove field</a>
+                </td>
+            </tr>
+        </table>
+    </form>
+</section>
+{% endfor %}
+{% endblock%}

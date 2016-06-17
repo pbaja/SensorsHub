@@ -1,13 +1,14 @@
 <html>
 	<head>
 		{% block head %}
-		<title>{% block title %}SensorsHub{% endblock %}</title>
+		<title>{% block title %}SensorsHub Settings{% endblock %}</title>
 		<meta charset="utf-8" />
 		<meta name="author" content="Skewoo" />
 		<meta name="viewport" content="width=device-width">
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
 		<link rel="shortcut icon" href="/static/icon.ico">
 		<link rel="stylesheet" media="all" href="/static/base.css"/>
+        <link rel="stylesheet" media="all" href="/static/settings.css"/>
         <link rel="stylesheet" media="all" href="/static/hint.css"/>
         {% if config.get("dark_theme", False) %}<link rel="stylesheet" media="all" href="/static/dark.css"/>{% endif %}
 		<link rel="stylesheet" media="all" href="https://fonts.googleapis.com/css?family=Open+Sans:400,600,700"/>
@@ -33,11 +34,20 @@
                 <li class="right"><a href="/settings">Settings</a></li>
             </ul>
         </header>
-		<div id="container">
-            {% if msg %}<div class="message">{{msg}}</div>{% endif %}
-            {% if success %}<div class="message success">{{success}}</div>{% endif %}
-            {% if error %}<div class="message error">{{error}}</div>{% endif %}
-			{% block content %}{% endblock %}
-		</div>
+        <div id="main">
+            <div id="sidebar">
+                <ul>
+                    <li><a href="/settings">Settings Home</a></li>
+                    <li><a href="/settings/sensors">Sensors</a></li>
+                    <li><a href="/settings/log">Log</a></li>
+                </ul>
+            </div>
+            <div id="container">
+                {% if msg %}<div class="message">{{msg}}</div>{% endif %}
+                {% if success %}<div class="message success">{{success}}</div>{% endif %}
+                {% if error %}<div class="message error">{{error}}</div>{% endif %}
+                {% block content %}{% endblock %}
+            </div>
+        </div>
 	</body>
 </html>

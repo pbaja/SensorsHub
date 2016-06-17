@@ -20,3 +20,13 @@ input:disabled {
 .title.smaller {
     color: #FFF;
 }
+
+#sidebar a {
+    color: #EEE;
+}
+#sidebar a:hover {
+    color: #AAA;
+}
+.sensors-table td {
+    background-color: #555;
+}

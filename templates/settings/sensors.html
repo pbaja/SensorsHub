@@ -1,0 +1,46 @@
+{% extends "settings/base.html" %}
+{% block head %}
+    {{ super() }}
+    <script>
+        confirmed = [];
+        function warn(obj) {
+            if(confirmed.lastIndexOf(obj) !== -1) return true;
+            var msg = "Changing this can result in loosing access to the website. This option is only for advanced users. Are you sure that you want to edit this?";
+            var confirm = window.confirm(msg);
+            if(confirm) confirmed.push(obj);
+            console.log(confirmed);
+            return confirm;
+        }
+    </script>
+{% endblock %}
+{% block content %}
+<section>
+    <h2>All sensors</h2>
+    <table class="sensors-table">
+        {% for sensor in sensors %}
+            <tr>
+            <td>{{ sensor.title }}</td>
+            <td>{{ sensor.description }}</td>
+            <td>
+                <a class="button smaller" href="/settings/sensor?sid={{ sensor.sid }}">Edit sensor</a>
+            </td>
+            </tr>
+        {% endfor %}
+    </table>
+</section>
+<section>
+    <h2>Inactive sensors</h2>
+    --- FUTURE OPTION NOT YET AVAILABLE ---
+</section>
+<section>
+    <h2>Add new sensor manually</h2>
+    <form action="/settings/sensors/" method="POST">
+        <input class="wide" type="number" name="sid" placeholder="SensorID" /><br>
+        <input class="wide" type="text" name="token" placeholder="Token, leave this empty to generate" /><br>
+        <input class="wide" type="text" name="title" placeholder="Title" /><br>
+        <input class="wide" type="text" name="description" placeholder="Description" /><br>
+        <input type="hidden" name="action" value="add" />
+        <input class="Button" type="submit" value="Create sensor" /><br>
+    </form>
+</section>
+{% endblock%}

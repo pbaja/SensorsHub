@@ -1,31 +1,13 @@
 import cherrypy,  json, datetime, sqlite3, time
-from jinja2 import Environment, FileSystemLoader
 
 from libs.fields import Field
 from libs.graphs import Graph
-from libs.accounts import Account
 
 class WebRoot(object):
 
-    def __init__(self, core):
-        # Load templates
-        self.env = Environment(loader=FileSystemLoader('templates'))
-
-        def to_json(value): return json.dumps(value)
-        self.env.filters["to_json"] = to_json
-
-        def format_datetime(value, format="%d.%m.%Y %H:%M"):
-            if value == None:
-                return "Never"
-            else:
-                try:
-                    return datetime.datetime.fromtimestamp(value).strftime(format)
-                except TypeError:
-                    return value.strftime(format)
-        self.env.filters["strftime"] = format_datetime
-
-        # Save core object
+    def __init__(self, core, env):
         self.core = core
+        self.env = env
 
     def bench(self, started):
         """Internal function used to test page generation time"""
@@ -130,33 +112,6 @@ class WebRoot(object):
                                                                         error="Sensor with that ID already exist", config=self.core.config)+self.bench(start)
 
         return self.env.get_template('sensors.html').render(sensors=self.core.sensors.sensors, config=self.core.config)+self.bench(start)
-
-    @cherrypy.expose
-    def settings(self, *args, **kwargs):
-        """Settings page"""
-        start = time.time()
-        account = self.core.accounts.protect()
-
-        if "update_account" in kwargs:
-            if kwargs["password"] != kwargs["password_repeat"]:
-                return self.env.get_template('settings.html').render(error="Passwords does not match",
-                                                                     account=account, config=self.core.config) + self.bench(start)
-            if kwargs["password"] != "": account.password = Account.hash_password(kwargs["password"])
-            account.email = kwargs["email"]
-            account.commit()
-            self.core.accounts.logout_user(account)
-            return self.env.get_template('settings.html').render(success="Account updated",account=account) + self.bench(start)
-
-        elif "update_config" in kwargs:
-            self.core.config.set("colorize_field_tile", kwargs["colorize_field_tile"] == "1",False)
-            self.core.config.set("dark_theme", kwargs["dark_theme"] == "1",False)
-            self.core.config.set("port", int(kwargs["port"]),False)
-            self.core.config.set("host", kwargs["host"],False)
-            self.core.config.save()
-            return self.env.get_template('settings.html').render(success="Settings updated", account=account,
-                                                                 config=self.core.config) + self.bench(start)
-
-        return self.env.get_template('settings.html').render(account=account, config=self.core.config)+self.bench(start)
 
     @cherrypy.expose
     def log(self):
