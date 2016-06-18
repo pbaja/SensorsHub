@@ -32,6 +32,7 @@ class WebSettings():
             self.core.config.set("dark_theme", kwargs["dark_theme"] == "1", False)
             self.core.config.set("port", int(kwargs["port"]), False)
             self.core.config.set("host", kwargs["host"], False)
+            self.core.config.set("hide_update_time", kwargs["hide_update_time"] == "1", False)
             self.core.config.save()
             return self.render("/settings/settings.html", account=account, success="Settings updated")
 

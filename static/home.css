@@ -5,8 +5,8 @@
 .sensor-section {
     /* Shape */
     flex: 1;
-    max-width: 250px;
-    min-width: 200px;
+    max-width: 300px;
+    min-width: 220px;
     margin: 10px;
     padding: 10px;
 
@@ -24,6 +24,13 @@
     color: #FFF;
     border-radius: 3px;
     cursor: default;
+}
+
+@media (min-width: 768px) {
+    .sensor-section {
+        max-width: 280px;
+        min-width: 280px;
+    }
 }
 
 .sensor-left {

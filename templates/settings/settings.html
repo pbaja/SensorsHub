@@ -42,29 +42,40 @@
     <h2>Configuration</h2>
     <form action="/settings/" method="POST">
         <table>
+            <tr><th><div class="title">Server settings</div></th></tr>
             <tr>
-                <th scope="col">Web server host</th>
+                <td>Web server host</td>
                 <td><input class="wide" onkeydown="warn(this)" type="text" name="host" value="{{ config.get("host", "0.0.0.0") }}"/></td>
             </tr>
             <tr>
-                <th scope="col">Web server port</th>
+                <td>Web server port</td>
                 <td><input class="wide" onkeydown="warn(this)" type="number" name="port" value="{{ config.get("port", 80) }}"/></td>
             </tr>
+            <tr><th><div class="title">Appearance settings</div></th></tr>
             <tr>
-                <th scope="col">Use field colors for tiles on home page</th>
-                <td>
-                    <select class="wide" name="colorize_field_tile">
-                        <option value="0" {% if not config.get("colorize_field_tile", False) %}selected{% endif %}>No</option>
-                        <option value="1" {% if config.get("colorize_field_tile", False) %}selected{% endif %}>Yes</option>
-                    </select>
-                </td>
-            </tr>
-            <tr>
-                <th scope="col">Theme</th>
+                <td>Theme</td>
                 <td>
                     <select class="wide" name="dark_theme">
                         <option value="0" {% if not config.get("dark_theme", False) %}selected{% endif %}>Light</option>
                         <option value="1" {% if config.get("dark_theme", False) %}selected{% endif %}>Dark</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>Show update time on tiles</td>
+                <td>
+                    <select class="wide" name="hide_update_time">
+                        <option value="0" {% if not config.get("hide_update_time", False) %}selected{% endif %}>Yes</option>
+                        <option value="1" {% if config.get("hide_update_time", False) %}selected{% endif %}>No</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>Use field colors for tiles</td>
+                <td>
+                    <select class="wide" name="colorize_field_tile">
+                        <option value="0" {% if not config.get("colorize_field_tile", False) %}selected{% endif %}>No</option>
+                        <option value="1" {% if config.get("colorize_field_tile", False) %}selected{% endif %}>Yes</option>
                     </select>
                 </td>
             </tr>

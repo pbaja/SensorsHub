@@ -40,6 +40,11 @@
     }
 }
 
+th .title {
+    font-size: 1.1em;
+    padding: 1em 0;
+}
+
 .sensors-table {
     width: 100%;
     border-collapse: separate;
