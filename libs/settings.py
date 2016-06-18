@@ -48,7 +48,7 @@ class WebSettings():
 
         if "action" in kwargs:
             if kwargs["action"] == "add":
-                if self.core.sensors.add(kwargs["sid"], kwargs["token"], kwargs["title"], kwargs["description"]):
+                if self.core.sensors.add(title=kwargs["title"], description=kwargs["description"]):
                     active_sensors = self.core.sensors.get_all(SensorStatus.ACTIVE)
                     return self.render("/settings/sensors.html", active_sensors=active_sensors,inactive_sensors=inactive_sensors , success="Sensor added")
                 else:
