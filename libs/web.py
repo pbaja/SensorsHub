@@ -2,6 +2,7 @@ import cherrypy,  json, datetime, sqlite3, time
 
 from libs.sensors import SensorStatus
 from libs.graphs import Graph
+from libs.fields import Field
 
 class WebRoot(object):
 
@@ -129,6 +130,8 @@ class WebRoot(object):
                 fields[name][key] = value
 
             sensor = self.core.sensors.add(title=args["title"],description=args["description"], status=SensorStatus.INACTIVE)
+            for name, field in fields.items():
+                Field.create(sensor.sid, name, **field)
 
             return json.dumps({"code": 20, "message": "Sensor registered. Now wait for user to enable it.", "sensorid": sensor.sid, "token": sensor.token})
 

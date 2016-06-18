@@ -68,11 +68,32 @@ class Field(object):
                 return None
 
     @staticmethod
-    def create(sid, name):
+    def create(sid, name, unit=None, display_name=None, icon=None, color=None):
         """Create new field in database and return it"""
+        into = ["sid", "name"]
+        values = [sid, name]
+
+        if unit is not None:
+            into.append("unit")
+            values.append(unit)
+        if display_name is not None:
+            into.append("display_name")
+            values.append(display_name)
+
+        style = ""
+        if icon is not None:
+            style += icon
+        if color is not None:
+            style += "#"
+            style += color
+        else:
+            style += "#000"
+        into.append("style")
+        values.append(style)
+
         with sqlite3.connect("db.sqlite") as conn:
-            result = conn.execute("INSERT INTO fields (sid, name) VALUES (?,?);", [sid, name])
-            return Field(sid, result.lastrowid, name, "", name, "", time.time())
+            result = conn.execute("INSERT INTO fields ("+",".join(into)+") VALUES ("+",".join(["?"] * len(into))+")", values)
+            return Field(sid, result.lastrowid, name, unit, display_name, style, time.time())
 
     def get_readings(self, delta=0, group_minutes="1S"):
         """Returns array with readings associated with this field (also stores them in field.readings)"""
