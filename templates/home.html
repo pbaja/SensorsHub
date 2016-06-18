@@ -62,13 +62,6 @@
         });
     }
     </script>
-    {% if config.get("hide_update_time", False) %}
-    <style>
-        .sensor-about {
-            display: none;
-        }
-    </style>
-    {% endif %}
 {% endblock %}
 {% block content %}
 <section>
@@ -82,15 +75,17 @@
                     <div class="sensor-center">
                         <div class="sensor-title">{{ sensor.title }} {{ field.display_name }}</div>
                         <div class="sensor-title">{{ field.readings[0].value }}{{ field.unit }}</div>
-                        {% if field.last_update() > 86400 %}
-                            <div class="sensor-about hint--bottom" aria-label="Updated more than 24h ago">
-                                {{ field.updated|strftime }}
-                                <i class="fa warn fa-exclamation-circle"></i>
-                            </div>
-                        {% else %}
-                            <div class="sensor-about">
-                                {{ field.updated|strftime }}
-                            </div>
+                        {% if config.get("show_update_time", True) %}
+                            {% if field.last_update() > 86400 %}
+                                <div class="sensor-about hint--bottom" aria-label="Updated more than 24h ago">
+                                    {{ field.updated|strftime }}
+                                    <i class="fa warn fa-exclamation-circle"></i>
+                                </div>
+                            {% else %}
+                                <div class="sensor-about">
+                                    {{ field.updated|strftime }}
+                                </div>
+                            {% endif %}
                         {% endif %}
                     </div>
                     <div class="sensor-right">

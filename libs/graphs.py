@@ -4,7 +4,7 @@ from libs.fields import Field
 class Graph(object):
 
     @staticmethod
-    def generate(field_ids, group_by="15M", range=60*60*24, sensor_label=False, sensors=None):
+    def generate(field_ids, group_by="15M", range=60*60*24, sensor_label=False, sensors=None, return_fields=False):
 
         # Group by
         group_labels = "%H:%M"
@@ -48,7 +48,7 @@ class Graph(object):
         datasets = []
         for field in fields:
             label = field.display_name
-            if sensor_label: label = sensors.get(sid=field.sid).title + " " + label
+            if sensor_label: label = sensors.get_single(sid=field.sid).title + " " + label
 
             dataset = {"label": label, "data": [], "fill": False, "borderColor": field.color}
             for values in y.values():
@@ -88,7 +88,9 @@ class Graph(object):
         '''
 
         # Create data for chart
-        return {
-                "labels": labels,
-                "datasets": datasets
-         }
+        data = {
+            "labels": labels,
+            "datasets": datasets
+        }
+        if return_fields: return (fields, data)
+        else: return data

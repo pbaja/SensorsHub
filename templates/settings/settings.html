@@ -19,19 +19,19 @@
     <form action="/settings/" method="POST">
         <table>
             <tr>
-                <th scope="col">Username</th>
+                <td>Username</td>
                 <td><input class="wide" type="text" disabled="1" value="{{ account.user }}"/></td>
             </tr>
             <tr>
-                <th>Password</th>
+                <td>Password</td>
                 <td><input class="wide" type="password" name="password" placeholder="New password"/></td>
             </tr>
             <tr>
-                <th>Repeat password</th>
+                <td>Repeat password</td>
                 <td><input class="wide" type="password" name="password_repeat" placeholder="Repeat password"/></td>
             </tr>
             <tr>
-                <th>Email</th>
+                <td>Email</td>
                 <td><input class="wide" type="email" name="email" value="{{ account.email }}" /></td>
             </tr>
         </table>
@@ -42,18 +42,37 @@
     <h2>Configuration</h2>
     <form action="/settings/" method="POST">
         <table>
+            <tr><th><div class="title">Basic settings</div></th></tr>
+            <tr>
+                <td>
+                    Title<br>
+                    <span class="setting-description">Displayed on the top left corner, and in the browser's title bar</span>
+                </td>
+                <td>
+                    <input type="text" class="wide" name="page_title" placeholder="Page title" value="{{ config.get("page_title", "SensorsHub") }}" />
+                </td>
+            </tr>
             <tr><th><div class="title">Server settings</div></th></tr>
             <tr>
-                <td>Web server host</td>
+                <td>
+                    Web server host<br>
+                    <span class="setting-description">Host at which Web server is listening, including /api, defualt '0.0.0.0' which means any interface</span>
+                </td>
                 <td><input class="wide" onkeydown="warn(this)" type="text" name="host" value="{{ config.get("host", "0.0.0.0") }}"/></td>
             </tr>
             <tr>
-                <td>Web server port</td>
+                <td>
+                    Web server port<br>
+                    <span class="setting-description">Port at which Web server is listening, including /api, defualt '80'</span>
+                </td>
                 <td><input class="wide" onkeydown="warn(this)" type="number" name="port" value="{{ config.get("port", 80) }}"/></td>
             </tr>
             <tr><th><div class="title">Appearance settings</div></th></tr>
             <tr>
-                <td>Theme</td>
+                <td>
+                    Theme<br>
+                    <span class="setting-description">Light or Dark theme</span>
+                </td>
                 <td>
                     <select class="wide" name="dark_theme">
                         <option value="0" {% if not config.get("dark_theme", False) %}selected{% endif %}>Light</option>
@@ -62,16 +81,22 @@
                 </td>
             </tr>
             <tr>
-                <td>Show update time on tiles</td>
                 <td>
-                    <select class="wide" name="hide_update_time">
-                        <option value="0" {% if not config.get("hide_update_time", False) %}selected{% endif %}>Yes</option>
-                        <option value="1" {% if config.get("hide_update_time", False) %}selected{% endif %}>No</option>
+                    Show update time on tiles<br>
+                    <span class="setting-description">Decide whether show or hide field update time on tiles</span>
+                </td>
+                <td>
+                    <select class="wide" name="show_update_time">
+                        <option value="0" {% if not config.get("show_update_time", True) %}selected{% endif %}>Hide</option>
+                        <option value="1" {% if config.get("show_update_time", True) %}selected{% endif %}>Show</option>
                     </select>
                 </td>
             </tr>
             <tr>
-                <td>Use field colors for tiles</td>
+                <td>
+                    Use field color for tiles background<br>
+                    <span class="setting-description">If enabled, tiles on home page will have field color instead of default one</span>
+                </td>
                 <td>
                     <select class="wide" name="colorize_field_tile">
                         <option value="0" {% if not config.get("colorize_field_tile", False) %}selected{% endif %}>No</option>

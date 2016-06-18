@@ -3,18 +3,24 @@ import sqlite3
 import string
 import time
 
+from enum import IntEnum
 from libs.fields import Field
 from libs.readings import Reading
+
+class SensorStatus(IntEnum):
+    ACTIVE = 0
+    INACTIVE = 1
 
 class Sensor(object):
     """Class containing one sensor"""
 
-    def __init__(self, sid, token, title, description, updated):
+    def __init__(self, sid, token, title, description, updated, status):
         self.sid = sid
         self.updated = updated
         self.token = token
         self.title = title
         self.description = description
+        self.status = status
 
     def set_token(self, token=None):
         """Set token of sensor, or generate if new token is Null"""
@@ -100,27 +106,50 @@ class Sensors(object):
     def load(self):
         """Loads all sensors from database"""
         with sqlite3.connect("db.sqlite") as conn:
-            results = conn.execute("SELECT sid, token, title, description, updated FROM sensors GROUP BY sid").fetchall()
+            results = conn.execute("SELECT sid, token, title, description, updated, status FROM sensors GROUP BY sid").fetchall()
             # Add all results to list
             for result in results:
-                self.sensors.append(Sensor(result[0],result[1],result[2],result[3],result[4]))
+                self.sensors.append(Sensor(result[0],result[1],result[2],result[3],result[4],result[5]))
 
-    def add(self, sid, token="", title=None, description=None):
+    def add(self, sid=None, token="", title=None, description=None, status=None):
         """Adds new sensor to database"""
-        if token == "": token = ''.join(random.choice(string.ascii_uppercase+string.digits) for _ in range(16))
-        if title == None: description = "Default title"
-        if description == None: description = "Default description"
+        into = []
+        values = []
+
+        if sid != None and sid != "":
+            into.append('sid')
+            values.append(int(sid))
+        if title != None:
+            into.append('title')
+            values.append(title)
+        if description != None:
+            into.append('description')
+            values.append(description)
+        if status != None and status != "":
+            into.append('status')
+            values.append(int(status))
+        else:
+            status = 0
+        if token == "":
+            token = ''.join(random.choice(string.ascii_uppercase+string.digits) for _ in range(16))
+            into.append('token')
+            values.append(token)
+        else:
+            into.append('token')
+            values.append(token)
 
         with sqlite3.connect("db.sqlite") as conn:
-            conn.execute("INSERT INTO sensors (sid, token, title, description) VALUES (?,?,?,?)",[sid,token,title, description])
-            sensor = Sensor(sid,token,title,description, None)
+            query = "INSERT INTO sensors ("+",".join(into)+") VALUES ("+",".join(["?"] * len(into))+")"
+            print(query)
+            result = conn.execute(query,values)
+            sensor = Sensor(result.lastrowid,token,title,description, None, int(status))
             self.sensors.append(sensor)
-            return True
+            return sensor
         return None
 
     def remove(self,sid):
         """Removes sensor from database and all of its fields and readings ! BE CAREFUL"""
-        sensor = self.get(sid)
+        sensor = self.get_single(sid)
         if sensor:
             with sqlite3.connect("db.sqlite") as conn:
                 conn.execute("DELETE FROM sensors WHERE sid=?",[sid])
@@ -130,12 +159,25 @@ class Sensors(object):
                 return True
         return False
 
-    def get(self, sid):
-        """Returns sensor from list by id"""
+    def get_single(self, sid=None, title=None):
+        """Returns sensor from list by sid"""
         for index, sensor in enumerate(self.sensors):
-            if sensor.sid == sid:
+            if sid is not None and sensor.sid == sid:
+                return self.sensors[index]
+            if title is not None and sensor.title == title:
                 return self.sensors[index]
         return None
+
+    def get_all(self, status=None):
+        "Gets all sensors by its status"
+        if status is None:
+            return self.sensors
+        else:
+            result = []
+            for sensor in self.sensors:
+                if sensor.status == status:
+                    result.append(sensor)
+            return result
 
     def get_readings(self, delta=None, group_minutes=None):
         """Returns fields with readings from all sensors"""

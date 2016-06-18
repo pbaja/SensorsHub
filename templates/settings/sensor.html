@@ -48,6 +48,9 @@
                 <th>Actions</th>
                 <td>
                     <input class="button smaller" type="submit" value="Update sensor"/>
+                    {% if sensor.status == 0 %}
+                    <a class="button smaller" href="/settings/sensor?sid={{ sensor.sid }}&action=disable">Disable</a>
+                    {% endif %}
                     <a class="show-warn-msg button smaller warning" href="/settings/sensor?sid={{ sensor.sid }}&action=regen">Regenerate token</a>
                     <a class="show-warn-msg button smaller error" href="/settings/sensor?sid={{ sensor.sid }}&action=remove">Remove sensor</a>
                 </td>

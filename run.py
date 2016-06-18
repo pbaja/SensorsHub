@@ -27,7 +27,14 @@ class Core(object):
             # description - Description of the sensor, f.eg. ESP8266 temperature sensor
             # updated - Timestamp updated when new reading is received
             conn.execute(
-                """CREATE TABLE IF NOT EXISTS sensors(sid INTEGER PRIMARY KEY, token TEXT, title TEXT, description TEXT, updated INTEGER)""")
+                "CREATE TABLE IF NOT EXISTS sensors("
+                "sid INTEGER PRIMARY KEY AUTOINCREMENT, "
+                "token TEXT, "
+                "title TEXT, "
+                "description TEXT, "
+                "updated INTEGER, "
+                "status INTEGER DEFAULT 0"
+                ")")
 
             # FIELDS
             # Table for fields, each sensor can have multiple fields

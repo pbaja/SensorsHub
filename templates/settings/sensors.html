@@ -17,7 +17,8 @@
 <section>
     <h2>All sensors</h2>
     <table class="sensors-table">
-        {% for sensor in sensors %}
+    {% if active_sensors %}
+        {% for sensor in active_sensors %}
             <tr>
             <td>{{ sensor.title }}</td>
             <td>{{ sensor.description }}</td>
@@ -26,11 +27,26 @@
             </td>
             </tr>
         {% endfor %}
+    {% else %}
+        <tr><th><div class="setting-description">No active sensors found</div></th></tr>
+    {% endif %}
+    <tr><th><div class="title">Disabled sensors</div></th></tr>
+    {% if inactive_sensors %}
+        {% for sensor in inactive_sensors %}
+            <tr>
+            <td>{{ sensor.title }}</td>
+            <td>{{ sensor.description }}</td>
+            <td>
+                <a class="button smaller" href="/settings/sensor?sid={{ sensor.sid }}">Edit</a>
+                <a class="button smaller" href="/settings/sensor?sid={{ sensor.sid }}&action=enable">Enable</a>
+                <a class="button smaller" href="/settings/sensor?sid={{ sensor.sid }}&action=remove">Remove</a>
+            </td>
+            </tr>
+        {% endfor %}
+    {% else %}
+        <tr><th><div class="setting-description">No inactive sensors found</div></th></tr>
+    {% endif %}
     </table>
-</section>
-<section>
-    <h2>Inactive sensors</h2>
-    --- FUTURE OPTION NOT YET AVAILABLE ---
 </section>
 <section>
     <h2>Add new sensor manually</h2>

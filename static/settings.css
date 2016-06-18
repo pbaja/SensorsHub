@@ -54,3 +54,8 @@ th .title {
     background-color: #BBB;
     padding: 5px;
 }
+
+.setting-description {
+    font-size: 0.75em;
+    color: #888;
+}

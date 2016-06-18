@@ -2,6 +2,7 @@ import cherrypy, time
 
 from libs.accounts import Account
 from libs.fields import Field
+from libs.sensors import SensorStatus
 
 class WebSettings():
 
@@ -32,7 +33,8 @@ class WebSettings():
             self.core.config.set("dark_theme", kwargs["dark_theme"] == "1", False)
             self.core.config.set("port", int(kwargs["port"]), False)
             self.core.config.set("host", kwargs["host"], False)
-            self.core.config.set("hide_update_time", kwargs["hide_update_time"] == "1", False)
+            self.core.config.set("page_title", kwargs["page_title"], False)
+            self.core.config.set("show_update_time", kwargs["show_update_time"] == "1", True)
             self.core.config.save()
             return self.render("/settings/settings.html", account=account, success="Settings updated")
 
@@ -41,21 +43,23 @@ class WebSettings():
     @cherrypy.expose
     def sensors(self, **kwargs):
         self.core.accounts.protect()
-        sensors = self.core.sensors.sensors
+        active_sensors = self.core.sensors.get_all(status=SensorStatus.ACTIVE)
+        inactive_sensors = self.core.sensors.get_all(status=SensorStatus.INACTIVE)
 
         if "action" in kwargs:
             if kwargs["action"] == "add":
-                if self.core.sensors.add(int(kwargs["sid"]), kwargs["token"], kwargs["title"], kwargs["description"]):
-                    return self.render("/settings/sensors.html", sensors=sensors , success="Sensor added")
+                if self.core.sensors.add(kwargs["sid"], kwargs["token"], kwargs["title"], kwargs["description"]):
+                    active_sensors = self.core.sensors.get_all(SensorStatus.ACTIVE)
+                    return self.render("/settings/sensors.html", active_sensors=active_sensors,inactive_sensors=inactive_sensors , success="Sensor added")
                 else:
-                    return self.render("/settings/sensors.html", sensors=sensors , error="Failed to add sensor")
+                    return self.render("/settings/sensors.html", active_sensors=active_sensors,inactive_sensors=inactive_sensors , error="Failed to add sensor")
 
-        return self.render("/settings/sensors.html", sensors=sensors)
+        return self.render("/settings/sensors.html", active_sensors=active_sensors,inactive_sensors=inactive_sensors)
 
     @cherrypy.expose
     def sensor(self, **kwargs):
         self.core.accounts.protect()
-        sensor = self.core.sensors.get(sid=int(kwargs["sid"]))
+        sensor = self.core.sensors.get_single(sid=int(kwargs["sid"]))
 
         if "action" in kwargs:
             if kwargs["action"] == "update_sensor":
@@ -72,6 +76,14 @@ class WebSettings():
                     return self.render("/settings/sensors.html", sensors = self.core.sensors.sensors, success="Sensor removed")
                 else:
                     return self.render("/settings/sensors.html", sensors = self.core.sensors.sensors, error="Failed to remove sensor")
+            elif kwargs["action"] == "enable":
+                sensor.status = SensorStatus.ACTIVE
+                sensor.commit()
+                return self.render("/settings/sensor.html", sensor=sensor, success="Sensor successfuly enabled")
+            elif kwargs["action"] == "disable":
+                sensor.status = SensorStatus.INACTIVE
+                sensor.commit()
+                return self.render("/settings/sensor.html", sensor=sensor, success="Sensor disabled")
             elif kwargs["action"] == "update_field":
                 field = Field.get(fid=int(kwargs["fid"]))[0]
                 field.display_name = kwargs["display_name"]
