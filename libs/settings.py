@@ -1,4 +1,4 @@
-import cherrypy, time
+import cherrypy, os, sqlite3
 
 from libs.accounts import Account
 from libs.fields import Field
@@ -39,6 +39,17 @@ class WebSettings():
             return self.render("/settings/settings.html", account=account, success="Settings updated")
 
         return self.render("/settings/settings.html", account=account)
+
+    @cherrypy.expose
+    def tools(self):
+        with sqlite3.connect("db.sqlite") as conn:
+
+            database = {
+                "filesize": round(os.path.getsize("db.sqlite")/1024/1024,2),
+                "readings":  conn.execute("SELECT COUNT(*) FROM readings").fetchone()[0]
+            }
+
+            return self.render("/settings/tools.html", database=database)
 
     @cherrypy.expose
     def sensors(self, **kwargs):

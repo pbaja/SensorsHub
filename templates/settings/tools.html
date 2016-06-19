@@ -1,0 +1,13 @@
+{% extends "settings/base.html" %}
+{% block head %}
+    {{ super() }}
+{% endblock %}
+{% block content %}
+<section>
+    <h2>Database</h2>
+    <table>
+        <tr><td>Filesize</td><td>{{ database.filesize }}MB</td></tr>
+        <tr><td>Total readings</td><td>{{ database.readings }}</td></tr>
+    </table>
+</section>
+{% endblock%}

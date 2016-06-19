@@ -1,8 +1,8 @@
 html, body {  color: #DDD;  }
 body {  background-color: #333;  }
 header li.header a {  color: #EEE;  }
-header li.right a {  color: #EEE;  }
-header li.right a:hover {  color:#AAA;  }
+header li.right a {  color: #CCC;  }
+header li.right a:hover {  color:#EEE;  }
 
 input:not([type="submit"]):not([type="checkbox"]), select {
     background-color: #222;
@@ -22,10 +22,10 @@ input:disabled {
 }
 
 #sidebar a {
-    color: #EEE;
+    color: #CCC;
 }
 #sidebar a:hover {
-    color: #AAA;
+    color: #EEE;
 }
 .sensors-table td {
     background-color: #555;

@@ -95,14 +95,14 @@ class Field(object):
             result = conn.execute("INSERT INTO fields ("+",".join(into)+") VALUES ("+",".join(["?"] * len(into))+")", values)
             return Field(sid, result.lastrowid, name, unit, display_name, style, time.time())
 
-    def get_readings(self, delta=0, group_minutes="1S"):
+    def get_readings(self, group_minutes="1S", date_from=None, date_to=None):
         """Returns array with readings associated with this field (also stores them in field.readings)"""
         with sqlite3.connect("db.sqlite") as conn:
             # Create updated value from delta
-            if delta != 0:
-                updated = time.time() - delta
-            else:
-                updated = 0
+            if date_to is None:
+                date_to = time.time()
+            if date_from is None:
+                date_from = date_to - 24*60*60
 
             # Split group_minutes to strftime format
             group_add = "%Y"
@@ -116,15 +116,15 @@ class Field(object):
             # If group_minutes not equals '1S', average results by group_minutes
             if group_minutes != "1S":
                 results = conn.execute(
-                    "SELECT fid, updated, AVG(value) FROM readings WHERE sid=? AND fid=? AND updated > ? "
+                    "SELECT fid, updated, AVG(value) FROM readings WHERE sid=? AND fid=? AND updated > ? AND updated < ? "
                     "GROUP BY strftime(?,datetime(updated, 'unixepoch'))+strftime(?,datetime(updated, 'unixepoch'))/? "
                     "ORDER BY updated",
-                    [self.sid, self.fid, updated, group_add, '%' + group_minutes[-1], group_minutes[:-1]]).fetchall()
+                    [self.sid, self.fid, date_from, date_to, group_add, '%' + group_minutes[-1], group_minutes[:-1]]).fetchall()
             # Otherwise, get all readings withouth averaging
             else:
                 results = conn.execute(
-                    "SELECT fid, updated, value FROM readings WHERE sid=? AND fid=? AND updated > ?;",
-                    [self.sid, self.fid, updated]).fetchall()
+                    "SELECT fid, updated, value FROM readings WHERE sid=? AND fid=? AND updated > ? AND updated < ?;",
+                    [self.sid, self.fid, date_from, date_to]).fetchall()
 
             # Create readings from results
             readings = []

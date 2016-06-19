@@ -9,35 +9,43 @@
 .tag-container {
     display: flex;
     flex-direction: row;
+    flex-wrap: wrap;
     align-items: stretch;
 }
+.tag {
+    flex: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 
-.tag-title {
-    font-size: 1.2em;
+    margin: 5px 3px;
+    padding: 5px 10px;
+    min-width: 170px;
+    max-width: 300px;
+    border-radius: 3px;
+    background-color: #333;
+    color: #FFF;
 }
 .tag-description {
     font-size: 0.75em;
     color: #DDD;
 }
-
-.tag {
-    flex: 1;
-    margin: 5px 3px;
-    padding: 5px 10px;
-    border: none;
-    border-radius: 3px;
-    background-color: #333;
-    color: #FFF;
-    text-align: center;
+.tag-right {
+    font-size: 1.2em;
+    margin-left: auto;
 }
+
 .tag.orange { background-color: #F90; }
 .tag.blue { background-color: #37F; }
 .tag.gray { background-color: #666; }
 
-.tag.input {
+input.tag {
+    display: inline-block;
+    text-align: center;
     font-size: 1.4em;
+    border: none;
 }
-.tag.input:hover {
+input.tag:hover {
     cursor: pointer;
     opacity: 0.9;
 }

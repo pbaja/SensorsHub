@@ -4,7 +4,7 @@ from libs.fields import Field
 class Graph(object):
 
     @staticmethod
-    def generate(field_ids, group_by="15M", range=60*60*24, sensor_label=False, sensors=None, return_fields=False):
+    def generate(field_ids, group_by="15M", date_from=None, date_to=None, sensor_label=False, sensors=None, return_fields=False, prefix=""):
 
         # Group by
         group_labels = "%H:%M"
@@ -22,7 +22,7 @@ class Graph(object):
         fields = []
         for fid in field_ids:
             field = Field.get(fid=fid)[0]
-            field.get_readings(range, group_by)
+            field.get_readings(group_by, date_from, date_to)
             fields.append(field)
 
         # Generate labels
@@ -50,7 +50,7 @@ class Graph(object):
             label = field.display_name
             if sensor_label: label = sensors.get_single(sid=field.sid).title + " " + label
 
-            dataset = {"label": label, "data": [], "fill": False, "borderColor": field.color}
+            dataset = {"label": prefix+label, "data": [], "fill": False, "borderColor": field.color}
             for values in y.values():
                 # Get value for exact field
                 for value in values:
@@ -61,31 +61,6 @@ class Graph(object):
                     dataset["data"].append(None)
 
             datasets.append(dataset)
-
-        '''
-        # Generate labels
-        readings = fields[0].readings
-        labels = []
-        ttime *= 60
-        for reading in readings:
-            # Round to nearest
-            upd = round(reading.updated / ttime) * ttime
-            # Append label
-            labels.append(datetime.datetime.fromtimestamp(upd).strftime(group_labels))
-
-        # Generate datasets
-        datasets = []
-        for field in fields:
-            label = field.display_name
-            #TODO Do it better :P
-            if sensor_label: label = sensors.get(sid=field.sid).title + " " + label
-
-            dataset = {"label": label, "data": [], "fill": False, "borderColor": field.color}
-            for reading in field.readings:
-                dataset["data"].append(reading.value)
-            datasets.append(dataset)
-
-        '''
 
         # Create data for chart
         data = {

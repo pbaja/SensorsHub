@@ -51,32 +51,48 @@
     <div class="tag-container">
         {% for field in fields %}
         <div class="tag" style="background-color: {{ field.color }}">
-            {{ field.display_name.title() }}
-            <div class="tag-title">{{field.readings[0].value}}{{ field.unit }}</div>
-            <div class="tag-description">Max: {{ field.max }} Min: {{ field.min }}</div>
+            <div class="tag-left">
+                {{ field.display_name.title() }}<br>
+                <div class="tag-description">Max: {{ field.max }} Min: {{ field.min }}</div>
+            </div>
+            <div class="tag-right">
+                {{field.readings[0].value}}{{ field.unit }}
+            </div>
         </div>
         {% endfor %}
         <div class="tag gray">
-            <div class="tag-title">Updated</div>
-            {{sensor.updated|strftime}}
+            <div class="tag-left">
+                Updated:
+            </div>
+            <div class="tag-right">
+                {{sensor.updated|strftime}}
+            </div>
+        </div>
+    </div>
+    <div class="tag-container">
+        <div class="tag gray">
+            <div class="tag-left">Range</div>
+            <div class="tag-right">
+                <select name="range">
+                    {% set range = settings["range"] %}
+                    <option value="1" {% if range == "1" %}selected{% endif %}>Last 1 hour</option>
+                    <option value="3" {% if range == "3" %}selected{% endif %}>Last 3 hours</option>
+                    <option value="6" {% if range == "6" %}selected{% endif %}>Last 6 hours</option>
+                    <option value="12" {% if range == "12" %}selected{% endif %}>Last 12 hours</option>
+                    <option value="24" {% if range == "24" %}selected{% endif %}>Last 24 hours</option>
+                    <option value="48" {% if range == "48" %}selected{% endif %}>Last 48 hours</option>
+                    <option value="168" {% if range == "168" %}selected{% endif %}>Last 7 days</option>
+                    <option value="336" {% if range == "336" %}selected{% endif %}>Last 14 days</option>
+                    <option value="744" {% if range == "744" %}selected{% endif %}>Last 31 days</option>
+                    <option value="2232" {% if range == "2232" %}selected{% endif %}>Last 3 months</option>
+                    <option value="8760" {% if range == "8760" %}selected{% endif %}>Last year</option>
+                    <option value="0" {% if range == "0" %}selected{% endif %}>All</option>
+                </select>
+            </div>
         </div>
         <div class="tag gray">
-            <div class="tag-title">Range</div>
-            <select name="range">
-                {% set range = settings["range"] %}
-                <option value="1" {% if range == "1" %}selected{% endif %}>Last 1 hour</option>
-                <option value="3" {% if range == "3" %}selected{% endif %}>Last 3 hours</option>
-                <option value="6" {% if range == "6" %}selected{% endif %}>Last 6 hours</option>
-                <option value="12" {% if range == "12" %}selected{% endif %}>Last 12 hours</option>
-                <option value="24" {% if range == "24" %}selected{% endif %}>Last 24 hours</option>
-                <option value="48" {% if range == "48" %}selected{% endif %}>Last 48 hours</option>
-                <option value="168" {% if range == "168" %}selected{% endif %}>Last 7 days</option>
-                <option value="336" {% if range == "336" %}selected{% endif %}>Last 14 days</option>
-                <option value="744" {% if range == "744" %}selected{% endif %}>Last 31 days</option>
-                <option value="2232" {% if range == "2232" %}selected{% endif %}>Last 3 months</option>
-                <option value="8760" {% if range == "8760" %}selected{% endif %}>Last year</option>
-                <option value="0" {% if range == "0" %}selected{% endif %}>All</option>
-            </select>
+            <div class="tag-left">Date</div>
+            <div class="tag-right"><input type="date" name="date" value="{{ settings.date }}" /></div>
         </div>
         <div class="tag gray">
             <div class="tag-title">Average by</div>
@@ -94,7 +110,7 @@
                 <option value="6m" {% if group == "6m" %}selected{% endif %}>6 Months</option>
             </select>
         </div>
-        <input class="tag gray input" type="submit" value="Update" /><br>
+        <input class="tag gray" type="submit" value="Update" /><br>
     </div>
     <br>
     <canvas id="graph" width="400" height="150"></canvas>

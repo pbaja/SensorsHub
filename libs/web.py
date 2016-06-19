@@ -36,16 +36,9 @@ class WebRoot(object):
         if len(args) != 1: raise cherrypy.HTTPRedirect("/index")
 
         # Get settings from kwargs
-        settings = {"group": "15M", "range": "24"}
+        settings = {"group": "15M", "range": "24", "date": datetime.datetime.now().strftime("%Y-%m-%d")}
         for arg, value in kwargs.items():
-            arg = arg.split("_")
-            settings.update({arg[0]: value})
-
-        range = 60 * 60 * 24
-        if settings["range"]:
-            range = 60 * 60 * int(settings["range"])
-        else:
-            settings["range"] = "24"
+            settings.update({arg: value})
 
         # Get fields ids from sensor
         fids = []
@@ -53,8 +46,15 @@ class WebRoot(object):
         for field in sensor.get_fields():
             fids.append(field.fid)
 
+        # Prepare date
+        date_to = time.mktime(datetime.datetime.strptime(settings["date"],"%Y-%m-%d").timetuple())
+        date_from = None
+        if settings["range"]: date_from = date_to - (60 * 60 * int(settings["range"]))
+        else: settings["range"] = "24"
+
         # Generate data
-        fields, data = Graph.generate(fids,settings["group"],range,return_fields=True)
+        fields, data = Graph.generate(fids, settings["group"], date_from=date_from, date_to=date_to, return_fields=True)
+
         for field in fields:
             field.min = min(field.readings, key=lambda f: f.value).value
             field.max = max(field.readings, key=lambda f: f.value).value
