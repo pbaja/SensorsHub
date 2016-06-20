@@ -56,7 +56,7 @@
                 <div class="tag-description">Max: {{ field.max }} Min: {{ field.min }}</div>
             </div>
             <div class="tag-right">
-                {{field.readings[0].value}}{{ field.unit }}
+                {{field.readings[-1].value}}{{ field.unit }}
             </div>
         </div>
         {% endfor %}
@@ -80,19 +80,22 @@
                     <option value="6" {% if range == "6" %}selected{% endif %}>Last 6 hours</option>
                     <option value="12" {% if range == "12" %}selected{% endif %}>Last 12 hours</option>
                     <option value="24" {% if range == "24" %}selected{% endif %}>Last 24 hours</option>
-                    <option value="48" {% if range == "48" %}selected{% endif %}>Last 48 hours</option>
+                    <option value="48" {% if range == "48" %}selected{% endif %}>Last 2 days</option>
+                    <option value="96" {% if range == "48" %}selected{% endif %}>Last 4 days</option>
                     <option value="168" {% if range == "168" %}selected{% endif %}>Last 7 days</option>
                     <option value="336" {% if range == "336" %}selected{% endif %}>Last 14 days</option>
                     <option value="744" {% if range == "744" %}selected{% endif %}>Last 31 days</option>
                     <option value="2232" {% if range == "2232" %}selected{% endif %}>Last 3 months</option>
                     <option value="8760" {% if range == "8760" %}selected{% endif %}>Last year</option>
-                    <option value="0" {% if range == "0" %}selected{% endif %}>All</option>
                 </select>
             </div>
         </div>
         <div class="tag gray">
             <div class="tag-left">Date</div>
-            <div class="tag-right"><input type="date" name="date" value="{{ settings.date }}" /></div>
+            <div class="tag-right">
+                <input type="date" name="date" value="{{ settings.date }}" />
+                <input type="time" name="time" value="{{ settings.time }}" />
+            </div>
         </div>
         <div class="tag gray">
             <div class="tag-title">Average by</div>

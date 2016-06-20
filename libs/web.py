@@ -36,7 +36,8 @@ class WebRoot(object):
         if len(args) != 1: raise cherrypy.HTTPRedirect("/index")
 
         # Get settings from kwargs
-        settings = {"group": "15M", "range": "24", "date": datetime.datetime.now().strftime("%Y-%m-%d")}
+        now = datetime.datetime.now()
+        settings = {"group": "15M", "range": "24", "date": now.strftime("%Y-%m-%d"), "time": now.strftime("%H:%M")}
         for arg, value in kwargs.items():
             settings.update({arg: value})
 
@@ -47,7 +48,7 @@ class WebRoot(object):
             fids.append(field.fid)
 
         # Prepare date
-        date_to = time.mktime(datetime.datetime.strptime(settings["date"],"%Y-%m-%d").timetuple())
+        date_to = time.mktime(datetime.datetime.strptime(settings["date"]+" "+settings["time"],"%Y-%m-%d %H:%M").timetuple())
         date_from = None
         if settings["range"]: date_from = date_to - (60 * 60 * int(settings["range"]))
         else: settings["range"] = "24"
@@ -146,18 +147,22 @@ class WebRoot(object):
                 fids.append(int(fid))
 
             # Get settings from kwargs
-            settings = {"group": "15M", "range": "24"}
+            now = datetime.datetime.now()
+            settings = {"group": "15M", "range": "24", "date": now.strftime("%Y-%m-%d"), "time": now.strftime("%H:%M")}
             if "group" in kwargs:
                 settings["group"] = kwargs["group"]
             if "range" in kwargs:
                 settings["range"] = kwargs["range"]
 
-            range = 60 * 60 * 24
+            # Prepare date
+            date_to = time.mktime(
+                datetime.datetime.strptime(settings["date"] + " " + settings["time"], "%Y-%m-%d %H:%M").timetuple())
+            date_from = None
             if settings["range"]:
-                range = 60 * 60 * int(settings["range"])
+                date_from = date_to - (60 * 60 * int(settings["range"]))
             else:
                 settings["range"] = "24"
 
             # Generate data
-            data = Graph.generate(fids, settings["group"], range, sensor_label = True, sensors=self.core.sensors)
+            data = Graph.generate(fids, settings["group"], date_from=date_from, date_to=date_to, sensor_label = True, sensors=self.core.sensors)
             return json.dumps(data)
