@@ -164,7 +164,6 @@ class Core(object):
 
     def get_client_ip(self):
         headers = cherrypy.request.headers
-        print(headers)
         if "X-Forwarded-For" in headers and headers["X-Forwarded-For"] != "127.0.0.1":
             return headers["X-Forwarded-For"]
         if "X-Forwarded" in headers and headers["X-Forwarded"] != "127.0.0.1":
