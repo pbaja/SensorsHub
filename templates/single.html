@@ -81,7 +81,7 @@
                     <option value="12" {% if range == "12" %}selected{% endif %}>Last 12 hours</option>
                     <option value="24" {% if range == "24" %}selected{% endif %}>Last 24 hours</option>
                     <option value="48" {% if range == "48" %}selected{% endif %}>Last 2 days</option>
-                    <option value="96" {% if range == "48" %}selected{% endif %}>Last 4 days</option>
+                    <option value="96" {% if range == "96" %}selected{% endif %}>Last 4 days</option>
                     <option value="168" {% if range == "168" %}selected{% endif %}>Last 7 days</option>
                     <option value="336" {% if range == "336" %}selected{% endif %}>Last 14 days</option>
                     <option value="744" {% if range == "744" %}selected{% endif %}>Last 31 days</option>
@@ -102,6 +102,7 @@
             <select name="group">
                 {% set group = settings["group"] %}
                 <option value="1S" {% if group == "1S" %}selected{% endif %}>None</option>
+                <option value="5M" {% if group == "5M" %}selected{% endif %}>5 Minutes</option>
                 <option value="15M" {% if group == "15M" %}selected{% endif %}>15 Minutes</option>
                 <option value="30M" {% if group == "30M" %}selected{% endif %}>30 Minutes</option>
                 <option value="1H" {% if group == "1H" %}selected{% endif %}>1 Hour</option>

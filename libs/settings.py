@@ -41,7 +41,26 @@ class WebSettings():
         return self.render("/settings/settings.html", account=account)
 
     @cherrypy.expose
+    def login(self, **kwargs):
+        if "user" in kwargs and "pass" in kwargs:
+            if self.core.accounts.login_user(kwargs["user"], kwargs["pass"]):
+                raise cherrypy.HTTPRedirect("/settings")
+            else:
+                return self.render("/settings/login.html", error="Wrong username or password")
+
+        return self.render("/settings/login.html")
+
+    @cherrypy.expose
+    def logout(self):
+        if self.core.accounts.logout_user():
+            return self.render("home.html", success="Logged out")
+        else:
+            return self.render("home.html", error="Failed to log out")
+
+    @cherrypy.expose
     def tools(self):
+        self.core.accounts.protect()
+
         with sqlite3.connect("db.sqlite") as conn:
 
             database = {
@@ -50,6 +69,39 @@ class WebSettings():
             }
 
             return self.render("/settings/tools.html", database=database)
+
+    @cherrypy.expose
+    def log(self, **kwargs):
+        self.core.accounts.protect()
+
+        # Load all files from dir and sort them by modification date
+        all_files = os.listdir("logs")
+        all_files.sort(key=lambda k: -os.path.getmtime("logs/"+k))
+
+        # Get basename of files
+        files = []
+        for file in all_files:
+            if file.endswith(".log"):
+                files.append(os.path.basename(file).split(".")[-2])
+
+        log_file = files[0]
+        if "file" in kwargs:
+            log_file = kwargs["file"]
+
+        with open("logs/{}.log".format(log_file),"r") as file:
+            log = file.read()
+            formatted_log = ""
+            for line in log.split("\n"):
+                formatted_log += "<div class='"
+                if "[INFO]" in line: formatted_log += "info"
+                if "[DEBUG]" in line: formatted_log += "debug"
+                if "[WARNING]" in line: formatted_log += "warn"
+                if "[ERROR]" in line: formatted_log += "error"
+                formatted_log += "'>"
+                formatted_log += line
+                formatted_log += "</div>"
+
+        return self.env.get_template('/settings/log.html').render(files=files, log_file=log_file, log=formatted_log, config=self.core.config)
 
     @cherrypy.expose
     def sensors(self, **kwargs):

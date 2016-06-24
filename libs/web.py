@@ -1,4 +1,4 @@
-import cherrypy,  json, datetime, sqlite3, time
+import cherrypy,  json, datetime, time, logging
 
 from libs.sensors import SensorStatus
 from libs.graphs import Graph
@@ -19,15 +19,6 @@ class WebRoot(object):
         """Home page"""
         start = time.time()
         return self.env.get_template('home.html').render(sensors=self.core.sensors.sensors, config=self.core.config)+self.bench(start)
-
-    @cherrypy.expose
-    def logout(self):
-        """Loggnig out, unfortunately browser will immidiately log in you back automatically."""
-        start = time.time()
-        if self.core.accounts.logout_user():
-            return self.env.get_template('home.html').render(sensors=self.core.sensors.sensors,msg="Logged out", config=self.core.config)+self.bench(start)
-        else:
-            return self.env.get_template('home.html').render(sensors=self.core.sensors.sensors, msg="Failed to logout", config=self.core.config)+self.bench(start)
 
     @cherrypy.expose
     def single(self, *args, **kwargs):
@@ -61,10 +52,6 @@ class WebRoot(object):
             field.max = max(field.readings, key=lambda f: f.value).value
 
         return self.env.get_template('single.html').render(sensor=sensor, fields=fields, settings=settings, data=json.dumps(data), config=self.core.config)+self.bench(start)
-
-    @cherrypy.expose
-    def log(self):
-        return self.env.get_template('log.html').render(config=self.core.config)
 
     @cherrypy.expose
     def about(self):
@@ -104,6 +91,7 @@ class WebRoot(object):
 
             # Update sensor
             try:
+                logging.debug("Appended new data to sensor sid: {} title: {}".format(sensor.sid, sensor.title))
                 for field, value in kwargs.items():
                     sensor.add_reading(field,float(value))
             except ValueError:

@@ -62,6 +62,17 @@ class Graph(object):
 
             datasets.append(dataset)
 
+        # Generate average
+        avg_dataset = {"label": "Average", "data": [], "fill": False, "borderColor": "#777"}
+        for i in range(len(labels)):
+            sum = 0
+            tot = 0
+            for dataset in datasets:
+                sum += dataset["data"][i]
+                tot += 1
+            avg_dataset["data"].append(sum/tot)
+        datasets.append(avg_dataset)
+
         # Create data for chart
         data = {
             "labels": labels,

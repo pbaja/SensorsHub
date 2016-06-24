@@ -1,6 +1,6 @@
 from passlib.hash import pbkdf2_sha256
 from cherrypy._cpcompat import base64_decode
-import cherrypy, random, string, time, sqlite3
+import cherrypy, random, string, time, sqlite3, logging
 
 class Account():
 
@@ -38,17 +38,18 @@ class Account():
 
 class Accounts(object):
 
-    def __init__(self):
+    def __init__(self, core):
+        self.core = core
         self.accounts = []
 
         # Create default admin account if it does not exist
         with sqlite3.connect("db.sqlite") as conn:
             if len(conn.execute("SELECT user FROM accounts WHERE user='admin';").fetchall()) == 0:
-                print("Default admin account does not exist. Creating one for you.")
+                logging.warning("Default admin account does not exist. Creating one for you.")
                 if self.create_user("admin", "admin"):
-                    print("Account created. Default user: admin, password: admin. Change them immidiately!")
+                    logging.info("Account created. Default user: admin, password: admin. Change them immidiately!")
                 else:
-                    print("Failed to create admin account!")
+                    logging.error("Failed to create admin account!")
 
     def get_user(self, user=None, uid=None):
         for account in self.accounts:
@@ -57,19 +58,6 @@ class Accounts(object):
         return None
 
     def login_user(self, user, password):
-        # Maybe user is already logged in
-        account = self.get_user(user=user)
-        if account:
-            # Yep, user is already logged in, but make user our "new" user used right password
-            if pbkdf2_sha256.verify(password, account.password):
-                return account
-            else:
-                # No? Well, logout.
-                account.session = ""
-                account.commit()
-                self.accounts.remove(account)
-                return None
-
         # Check if user exist
         with sqlite3.connect("db.sqlite") as conn:
             result = conn.execute("SELECT uid, password, email FROM accounts WHERE user=?;", [user]).fetchall()
@@ -91,7 +79,12 @@ class Accounts(object):
                     cherrypy.response.cookie["session"] = account.session
                     cherrypy.response.cookie["session"]["path"] = "/"
                     cherrypy.response.cookie["session"]["max-age"] = 3600 * 6
+                    logging.info("User {} ({}) logged in".format(user, self.core.get_client_ip()))
                     return account
+                else:
+                    logging.warning("User {} supplied wrong password".format(user))
+            else:
+                logging.info("Someone tried to log in with username {}, but cannot find that user in database".format(user))
         return None
 
     def create_user(self, user, password, email=""):
@@ -117,6 +110,7 @@ class Accounts(object):
             cherrypy.response.cookie["session"] = ""
             cherrypy.response.cookie["session"]["path"] = "/"
             cherrypy.response.cookie["session"]["max-age"] = 3600 * 6
+            logging.info("User {} ({}) logged out".format(account.user, self.core.get_client_ip()))
             return True
         return False
 
@@ -124,8 +118,7 @@ class Accounts(object):
         """Use this function, when you want users to log in before accessing page"""
         account = self.verify_user()
         if not account:
-            cherrypy.serving.response.headers['www-authenticate'] = 'Basic realm="Please login"'
-            raise cherrypy.HTTPError(401, "You are not authorized to access that resource")
+            raise cherrypy.HTTPRedirect("/settings/login")
         return account
 
     def verify_user(self):
@@ -144,16 +137,6 @@ class Accounts(object):
                     account.session = ""
                     account.update()
                     self.accounts.remove(account)
+                    logging.warning("User {} ({}) is logged in, but cookie contains wrong token".format(account.user, self.core.get_client_ip()))
                     return None
-
-        # If cookies does not exist, check for authorization header
-        auth = cherrypy.request.headers.get('Authorization')
-        if auth:
-            scheme, params = auth.split(" ", 1)
-            if scheme.lower() == "basic":
-                username, password = base64_decode(params).split(":", 1)
-                account = self.login_user(username, password)
-                if account:
-                    return account
-
         return None

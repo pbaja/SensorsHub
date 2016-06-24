@@ -59,3 +59,17 @@ th .title {
     font-size: 0.75em;
     color: #888;
 }
+
+.log {
+    width: 100%;
+    overflow: auto;
+}
+.log div {
+    margin-top: 2px;
+    padding: 3px;
+    background-color: #444;
+}
+.log .info {  color: #FFF;  }
+.log .debug {  color: #AAA;  }
+.log .error {  color: #F30;  }
+.log .warn {  color: #F90;  }

@@ -1,4 +1,4 @@
-import json, os, getopt, sys
+import json, os, getopt, sys, logging
 
 class Config(object):
 
@@ -8,6 +8,7 @@ class Config(object):
 
         opts, args = getopt.getopt(sys.argv[1:], '', ["port=", "host=", "dark_theme"])
         for arg, value in opts:
+            logging.info("Config key {} changed to {} by commandline, ignoring config file value".format(arg, value))
             if arg == "--port":
                 self.args[arg[2:]] = int(value)
             elif arg in ("--dark_theme", "--colorize_field_tile"):
@@ -22,17 +23,18 @@ class Config(object):
             with open("config.json","w") as file:
                 file.write("{}")
                 self.config = {}
-                return False
+                logging.info("Created new config file config.json")
         # Otherwise, read config from file
         else:
             with open("config.json", "r") as file:
                 self.config = json.load(file)
-                return True
+                logging.info("Loaded config from config.json")
 
     def save(self):
         """Saves data back to file"""
         with open("config.json", "w") as file:
             json.dump(self.config, file)
+            logging.info("Saved config to config.json")
             return True
 
     def get(self, key, default):

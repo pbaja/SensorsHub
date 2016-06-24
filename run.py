@@ -1,9 +1,10 @@
 #!/usr/bin/python3.4
-import os
+import os, sys
 import sqlite3
 import cherrypy
 import json
 import datetime
+import logging
 
 from jinja2 import Environment, FileSystemLoader
 from libs.accounts import Accounts
@@ -13,7 +14,36 @@ from libs.web import WebRoot
 from libs.settings import WebSettings
 
 class Core(object):
+
+    VERSION = 0.00
+
     def __init__(self):
+        print("")
+
+        # Configure logger
+        logFormatter = logging.Formatter(fmt="[%(asctime)-15s][%(levelname)s] %(message)s", datefmt='%d.%m.%Y %H:%M:%S')
+        log = logging.getLogger()
+        log.setLevel(logging.DEBUG)
+
+        fileName = "logs/"+"sensorshub_{}_".format(datetime.datetime.now().strftime("%d-%m-%Y"))+"{}.log"
+        fileNum = 0
+
+        if not os.path.isdir("logs"):
+            os.mkdir("logs")
+
+        while os.path.isfile(fileName.format(fileNum)):
+            fileNum += 1
+
+        fileHandler = logging.FileHandler(fileName.format(fileNum))
+        fileHandler.setFormatter(logFormatter)
+        log.addHandler(fileHandler)
+
+        consoleHandler = logging.StreamHandler(sys.stdout)
+        consoleHandler.setFormatter(logFormatter)
+        log.addHandler(consoleHandler)
+
+        logging.info("Starting SensorsHub version {}".format(self.VERSION))
+
         # Create databse and tables
         with sqlite3.connect("db.sqlite") as conn:
 
@@ -82,15 +112,11 @@ class Core(object):
         self.sensors.load()
 
         # Create and load accounts
-        self.accounts = Accounts()
+        self.accounts = Accounts(self)
 
-        # Create website
+        # Configure web template engine
         env = Environment(loader=FileSystemLoader('templates'))
-
-        def to_json(value):
-            return json.dumps(value)
-
-        env.filters["to_json"] = to_json
+        env.filters["to_json"] = lambda value: json.dumps(value)
 
         def format_datetime(value, format="%d.%m.%Y %H:%M"):
             if value == None:
@@ -100,13 +126,18 @@ class Core(object):
                     return datetime.datetime.fromtimestamp(value).strftime(format)
                 except TypeError:
                     return value.strftime(format)
-
         env.filters["strftime"] = format_datetime
 
-        cherrypy.config.update({
+        # Configure web server
+        cherrypy_config = {
             "server.socket_port": self.config.get("port", 80),
-            "server.socket_host": self.config.get("host", "0.0.0.0")
-        })
+            "server.socket_host": self.config.get("host", "0.0.0.0"),
+            "checker.check_skipped_app_config": False,
+            "log.screen": False,
+            "log.access_file": '',
+            "log.error_file": ''
+        }
+        cherrypy.config.update(cherrypy_config)
         cherrypy.tree.mount(WebRoot(self,env),"/", {
             "/static": {
                 "tools.staticdir.root": os.getcwd(),
@@ -114,10 +145,33 @@ class Core(object):
                 "tools.staticdir.dir": "static"
             }
         })
-        cherrypy.tree.mount(WebSettings(self, env), "/settings", None)
+        cherrypy.tree.mount(WebSettings(self, env), "/settings", {
+
+        })
+
+        # Disable cherrypy loggers
+        logging.info("Starting up web server at {}:{}".format(cherrypy_config["server.socket_host"], cherrypy_config["server.socket_port"]))
+
+        logging.getLogger("cherrypy").propagate = False
+        #logging.getLogger("cherrypy.error").propagate = False
+        logging.getLogger("cherrypy.access").propagate = False
+
         cherrypy.engine.signals.subscribe()
         cherrypy.engine.start()
+
+        logging.info("Done loading")
         cherrypy.engine.block()
+
+    def get_client_ip(self):
+        headers = cherrypy.request.headers
+        print(headers)
+        if "X-Forwarded-For" in headers and headers["X-Forwarded-For"] != "127.0.0.1":
+            return headers["X-Forwarded-For"]
+        if "X-Forwarded" in headers and headers["X-Forwarded"] != "127.0.0.1":
+            return headers["X-Forwarded"]
+        if "Remote-Addr" in headers and headers["Remote-Addr"] != "127.0.0.1":
+            return headers["Remote-Addr"]
+        return "0.0.0.0"
 
 if __name__ == "__main__":
     Core()

@@ -2,6 +2,7 @@ import random
 import sqlite3
 import string
 import time
+import logging
 
 from enum import IntEnum
 from libs.fields import Field
@@ -110,11 +111,14 @@ class Sensors(object):
             # Add all results to list
             for result in results:
                 self.sensors.append(Sensor(result[0],result[1],result[2],result[3],result[4],result[5]))
+            logging.info("Loaded {} sensors from database".format(len(results)))
 
     def add(self, sid=None, token="", title=None, description=None, status=None):
         """Adds new sensor to database"""
         into = []
         values = []
+
+        logging.debug("Trying to create new sensor, title: {}".format(title))
 
         if sid != None and sid != "":
             into.append('sid')
@@ -140,15 +144,15 @@ class Sensors(object):
 
         with sqlite3.connect("db.sqlite") as conn:
             query = "INSERT INTO sensors ("+",".join(into)+") VALUES ("+",".join(["?"] * len(into))+")"
-            print(query)
             result = conn.execute(query,values)
             sensor = Sensor(result.lastrowid,token,title,description, None, int(status))
             self.sensors.append(sensor)
+            logging.info("Created new sensor, name: {} sid: {} ".format(title, result.lastrowid))
             return sensor
-        return None
 
     def remove(self,sid):
         """Removes sensor from database and all of its fields and readings ! BE CAREFUL"""
+        logging.debug("Trying to remove sensor sid: {}".format(sid))
         sensor = self.get_single(sid)
         if sensor:
             with sqlite3.connect("db.sqlite") as conn:
@@ -156,7 +160,9 @@ class Sensors(object):
                 conn.execute("DELETE FROM fields WHERE sid=?", [sid])
                 conn.execute("DELETE FROM readings WHERE sid=?", [sid])
                 self.sensors.remove(sensor)
+                logging.info("Removed sensor name: {} sid: ".format(sensor.title, sid))
                 return True
+        logging.debug("Failed to remove, sensor {} does not exist".format(sid))
         return False
 
     def get_single(self, sid=None, title=None):

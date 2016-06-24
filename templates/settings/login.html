@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block head %}
+    {{ super() }}
+{% endblock %}
+{% block content %}
+<section>
+    <h2>Logging in</h2>
+    <form action="/settings/login/" method="POST">
+        <input type="text" name="user" placeholder="User"/><br>
+        <input type="password" name="pass" placeholder="Password"/><br>
+        <input type="submit" class="button" value="Log in"/>
+    </form>
+</section>
+{% endblock%}
