@@ -135,7 +135,7 @@ class Accounts(object):
                 else:
                     # Session key is not correct, logout
                     account.session = ""
-                    account.update()
+                    account.commit()
                     self.accounts.remove(account)
                     logging.warning("User {} ({}) is logged in, but cookie contains wrong token".format(account.user, self.core.get_client_ip()))
                     return None

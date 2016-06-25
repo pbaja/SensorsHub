@@ -1,7 +1,7 @@
 ![SensorsHub](http://i.imgur.com/tBlr8TD.png)  
 # SensorsHub  
-**Current version: ALPHA**  
-**Changelog: Not Yet Available**
+**Current version: ALPHA 0.01**  
+**Changelog: Not Yet Available**  
 **Documentation: [Wiki page](https://github.com/SkewPL/SensorsHub/wiki)**  
   
 ## Features  
@@ -14,7 +14,7 @@
  - Very simple API, super user and developer friendly
   
 ## Installation  
- - Install dependencies: `sudo apt-get install python3 pip3 git-core`
+ - Install dependencies: `sudo apt-get install python3 python3-pip git-core`
  - Install requirements: `sudo pip3 install cherrypy passlib markdown2`
  - Download code: `git clone https://github.com/SkewPL/SensorsHub.git`
  - Add executable flag `cd SensorsHub && chmod +x run.py`

@@ -19,7 +19,6 @@ class Lang(object):
         lang = self.langs[self.core.config.get("language")]
         while True:
             if key in lang["strings"]:
-                print("Got key: {} value: {}".format(key, lang["strings"][key]))
                 return lang["strings"][key]
             if lang["fallback"] in self.langs.keys():
                 lang = self.langs[lang["fallback"]]
