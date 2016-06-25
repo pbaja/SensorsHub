@@ -32,16 +32,17 @@
 ![Sensors list](http://i.imgur.com/4HsapW4.png)
   
 ## TODO  
- - [ ] Multiple languages support
+ - [x] Multiple languages support
  - [ ] Update home page field values with javascript  
  - [x] Make pairing with sensors more easly
  - [ ] Allow guests to change theme to dark/light  
  - [x] Better Sensors page, more readable  
  - [x] Create Log page, well, implement logging first.  
- - [ ] Create About page  
+ - [x] Create About page  
  - [ ] Multiple accounts with permissions  
  - [x] Allow sensors to send Field descriptions and display names when creating them  
  - [ ] Sending data TO sensors (a.k.a. switches)  
+ - [ ] Triggers (for e.g. close window, when temperature inside is lower than outside)
  - [ ] Multiple field types: bool, int, float, percent  
  - [ ] Comparing data for multiple periods from multiple fields  
  - [ ] More API functions for developers (Getting data from database, modifying)  
