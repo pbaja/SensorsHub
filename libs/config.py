@@ -1,11 +1,13 @@
-import json, os, getopt, sys, logging
+import json, os, getopt, sys, logging, shutil
 
 class Config(object):
 
     def __init__(self):
         self.config = {}
+        self.config_default = {}
         self.args = {}
 
+        # Load config from command line
         opts, args = getopt.getopt(sys.argv[1:], '', ["port=", "host=", "dark_theme"])
         for arg, value in opts:
             logging.info("Config key {} changed to {} by commandline, ignoring config file value".format(arg, value))
@@ -18,12 +20,15 @@ class Config(object):
 
     def load(self):
         """Loads data from config file, or creates it if it does not exist."""
-        # Create config file if it does not exist
+        # Read default config file
+        with open("config_default.json","r") as file:
+            self.config_default = json.load(file)
+
+        # If config file does not exist, copy default values
         if not os.path.isfile("config.json"):
-            with open("config.json","w") as file:
-                file.write("{}")
-                self.config = {}
-                logging.info("Created new config file config.json")
+            shutil.copy("config_default.json","config.json")
+            logging.info("Created new config file config.json")
+
         # Otherwise, read config from file
         else:
             with open("config.json", "r") as file:
@@ -37,16 +42,16 @@ class Config(object):
             logging.info("Saved config to config.json")
             return True
 
-    def get(self, key, default):
+    def get(self, key):
         if key in self.args:
             return self.args[key]
-
         if key in self.config:
             return self.config[key]
-
-        self.config[key] = default
-        self.save()
-        return default
+        if key in self.config_default:
+            self.config[key] = self.config_default[key]
+            self.save()
+            return self.config[key]
+        return None
 
     def set(self, key, value, save=True):
         self.config[key] = value

@@ -1,0 +1,10 @@
+{
+  "dark_theme": false,
+  "colorize_field_tile": false,
+  "show_update_time": true,
+  "language": "en_EN",
+  "about_page": "**This is default about page. Change it in settings.**",
+  "page_title": "SensorsHub",
+  "host": "0.0.0.0",
+  "port": 80
+}

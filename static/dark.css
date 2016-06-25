@@ -4,7 +4,7 @@ header li.header a {  color: #EEE;  }
 header li.right a {  color: #CCC;  }
 header li.right a:hover {  color:#EEE;  }
 
-input:not([type="submit"]):not([type="checkbox"]), select {
+input:not([type="submit"]):not([type="checkbox"]), select, textarea {
     background-color: #222;
     border-color: #444;
     color: #FFF;

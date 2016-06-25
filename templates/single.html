@@ -52,8 +52,11 @@
         {% for field in fields %}
         <div class="tag" style="background-color: {{ field.color }}">
             <div class="tag-left">
+                <input type="checkbox" name="fids" value="{{ field.fid }}" {% if field.fid in fids %}checked{% endif %}/>
+            </div>
+            <div class="tag-left">
                 {{ field.display_name.title() }}<br>
-                <div class="tag-description">Max: {{ field.max }} Min: {{ field.min }}</div>
+                <div class="tag-description">{{ lang.get("single_max") }}{{ field.max }} {{ lang.get("single_min") }}{{ field.min }}</div>
             </div>
             <div class="tag-right">
                 {{field.readings[-1].value}}{{ field.unit }}
@@ -62,7 +65,7 @@
         {% endfor %}
         <div class="tag gray">
             <div class="tag-left">
-                Updated:
+                {{ lang.get("single_updated") }}
             </div>
             <div class="tag-right">
                 {{sensor.updated|strftime}}
@@ -71,7 +74,7 @@
     </div>
     <div class="tag-container">
         <div class="tag gray">
-            <div class="tag-left">Range</div>
+            <div class="tag-left">{{ lang.get("single_range") }}</div>
             <div class="tag-right">
                 <select name="range">
                     {% set range = settings["range"] %}
@@ -91,14 +94,14 @@
             </div>
         </div>
         <div class="tag gray">
-            <div class="tag-left">Date</div>
+            <div class="tag-left">{{ lang.get("single_date") }}</div>
             <div class="tag-right">
                 <input type="date" name="date" value="{{ settings.date }}" />
                 <input type="time" name="time" value="{{ settings.time }}" />
             </div>
         </div>
         <div class="tag gray">
-            <div class="tag-title">Average by</div>
+            <div class="tag-title">{{ lang.get("single_average_by") }}</div>
             <select name="group">
                 {% set group = settings["group"] %}
                 <option value="1S" {% if group == "1S" %}selected{% endif %}>None</option>
@@ -114,7 +117,7 @@
                 <option value="6m" {% if group == "6m" %}selected{% endif %}>6 Months</option>
             </select>
         </div>
-        <input class="tag gray" type="submit" value="Update" /><br>
+        <input class="tag gray" type="submit" value="{{ lang.get("single_button_update") }}" /><br>
     </div>
     <br>
     <canvas id="graph" width="400" height="150"></canvas>

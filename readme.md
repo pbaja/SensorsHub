@@ -1,6 +1,8 @@
 ![SensorsHub](http://i.imgur.com/tBlr8TD.png)  
 # SensorsHub  
 **Current version: ALPHA**  
+**Changelog: Not Yet Available**
+**Documentation: [Wiki page](https://github.com/SkewPL/SensorsHub/wiki)**  
   
 ## Features  
  - Light/Dark theme  
@@ -13,14 +15,11 @@
   
 ## Installation  
  - Install dependencies: `sudo apt-get install python3 pip3 git-core`
- - Install requirements: `sudo pip3 install cherrypy passlib`
+ - Install requirements: `sudo pip3 install cherrypy passlib markdown2`
  - Download code: `git clone https://github.com/SkewPL/SensorsHub.git`
  - Add executable flag `cd SensorsHub && chmod +x run.py`
  - Run using `./run.py` or `python3 run.py`
  - Go to the `http://yourip` and configure everything.  
-  
-## Documentation  
-Documentation including setting up sensors is available at [Wiki page](https://github.com/SkewPL/SensorsHub/wiki)
   
 ## Screenshots  
 #### Home page  

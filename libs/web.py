@@ -1,4 +1,4 @@
-import cherrypy,  json, datetime, time, logging
+import cherrypy,  json, datetime, time, logging, markdown2
 
 from libs.sensors import SensorStatus
 from libs.graphs import Graph
@@ -10,15 +10,16 @@ class WebRoot(object):
         self.core = core
         self.env = env
 
-    def bench(self, started):
-        """Internal function used to test page generation time"""
-        return "<!-- Page generated in {}ms -->".format(round(time.time() - started, 4))
+    def render(self, template, **kwargs):
+        kwargs["config"] = self.core.config
+        kwargs["lang"] = self.core.lang
+        return self.env.get_template(template).render(**kwargs)
 
     @cherrypy.expose
     def index(self):
         """Home page"""
         start = time.time()
-        return self.env.get_template('home.html').render(sensors=self.core.sensors.sensors, config=self.core.config)+self.bench(start)
+        return self.render('home.html', sensors=self.core.sensors.sensors)
 
     @cherrypy.expose
     def single(self, *args, **kwargs):
@@ -32,11 +33,18 @@ class WebRoot(object):
         for arg, value in kwargs.items():
             settings.update({arg: value})
 
-        # Get fields ids from sensor
-        fids = []
         sensor = self.core.sensors.get_single(int(args[0]))
-        for field in sensor.get_fields():
-            fids.append(field.fid)
+
+        # Get field ids from args
+        fids = []
+        if "fids" in kwargs:
+            for fid in kwargs["fids"]:
+                fids.append(int(fid))
+
+        # Get field ids from sensor
+        else:
+            for field in sensor.get_fields():
+                fids.append(field.fid)
 
         # Prepare date
         date_to = time.mktime(datetime.datetime.strptime(settings["date"]+" "+settings["time"],"%Y-%m-%d %H:%M").timetuple())
@@ -51,11 +59,12 @@ class WebRoot(object):
             field.min = min(field.readings, key=lambda f: f.value).value
             field.max = max(field.readings, key=lambda f: f.value).value
 
-        return self.env.get_template('single.html').render(sensor=sensor, fields=fields, settings=settings, data=json.dumps(data), config=self.core.config)+self.bench(start)
+        return self.render('single.html', fids=fids, sensor=sensor, fields=fields, settings=settings, data=json.dumps(data))
 
     @cherrypy.expose
     def about(self):
-        return self.env.get_template('about.html').render(config=self.core.config)
+        about_page = markdown2.markdown(self.core.config.get("about_page"))
+        return self.render('about.html', about_page=about_page)
 
     @cherrypy.expose
     def api(self, *raw_args, **kwargs):

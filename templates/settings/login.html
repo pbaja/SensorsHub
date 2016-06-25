@@ -3,12 +3,12 @@
     {{ super() }}
 {% endblock %}
 {% block content %}
-<section>
-    <h2>Logging in</h2>
+<section class="center">
+    <h2>{{ lang.get("login_title") }}</h2>
     <form action="/settings/login/" method="POST">
-        <input type="text" name="user" placeholder="User"/><br>
-        <input type="password" name="pass" placeholder="Password"/><br>
-        <input type="submit" class="button" value="Log in"/>
+        <input type="text" name="user" placeholder="{{ lang.get("login_user") }}"/><br>
+        <input type="password" name="pass" placeholder="{{ lang.get("login_password") }}"/><br>
+        <input type="submit" class="button" value="{{ lang.get("login_button_login") }}"/>
     </form>
 </section>
 {% endblock%}

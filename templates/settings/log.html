@@ -4,12 +4,12 @@
 {% endblock %}
 {% block content %}
 <section>
-    <h2>Logs</h2>
+    <h2>{{ lang.get("logs_title") }}</h2>
     <form action="/settings/log/" method="POST"><select name="file">
         {% for file in files %}
-        <option {% if log_file == file %}selected{% endif %}>{{ file }}</option>
+        <option style="color:" {% if log_file == file %}selected{% endif %}>{{ file }}</option>
         {% endfor %}
-    </select><input type="submit" class="button smaller" value="See"/></form>
+    </select><input type="submit" class="button smaller" value="{{ lang.get("logs_button_see") }}"/></form>
     <div class="log">
         {{ log }}
     </div>

@@ -67,10 +67,17 @@ class Graph(object):
         for i in range(len(labels)):
             sum = 0
             tot = 0
+            non = False
             for dataset in datasets:
+                if dataset["data"][i] == None:
+                    non = True
+                    break
                 sum += dataset["data"][i]
                 tot += 1
-            avg_dataset["data"].append(sum/tot)
+
+            if non: avg_dataset["data"].append(None)
+            else: avg_dataset["data"].append(sum / tot)
+
         datasets.append(avg_dataset)
 
         # Create data for chart

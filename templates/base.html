@@ -1,7 +1,7 @@
 <html>
 	<head>
 		{% block head %}
-		<title>{% block title %}{{ config.get("page_title", "Sensors Hub") }}{% endblock %}</title>
+		<title>{% block title %}{{ config.get("page_title") }}{% endblock %}</title>
 		<meta charset="utf-8" />
 		<meta name="author" content="Skewoo" />
 		<meta name="viewport" content="width=device-width">
@@ -9,7 +9,7 @@
 		<link rel="shortcut icon" href="/static/icon.ico">
 		<link rel="stylesheet" media="all" href="/static/base.css"/>
         <link rel="stylesheet" media="all" href="/static/hint.css"/>
-        {% if config.get("dark_theme", False) %}<link rel="stylesheet" media="all" href="/static/dark.css"/>{% endif %}
+        {% if config.get("dark_theme") %}<link rel="stylesheet" media="all" href="/static/dark.css"/>{% endif %}
 		<link rel="stylesheet" media="all" href="https://fonts.googleapis.com/css?family=Open+Sans:400,600,700"/>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
 		{% endblock %}
@@ -28,9 +28,9 @@
 	<body>
         <header>
             <ul>
-                <li class="header"><a href="/index">{{ config.get("page_title", "Sensors Hub") }}</a></li>
-                <li class="right"><a href="/about">About</a></li>
-                <li class="right"><a href="/settings">Settings</a></li>
+                <li class="header"><a href="/index">{{ config.get("page_title") }}</a></li>
+                <li class="right"><a href="/about">{{ lang.get("menu_about") }}</a></li>
+                <li class="right"><a href="/settings">{{ lang.get("menu_settings") }}</a></li>
             </ul>
         </header>
 		<div id="container">

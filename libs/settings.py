@@ -1,4 +1,4 @@
-import cherrypy, os, sqlite3
+import cherrypy, os, sqlite3, markdown2
 
 from libs.accounts import Account
 from libs.fields import Field
@@ -12,6 +12,7 @@ class WebSettings():
 
     def render(self, template, **kwargs):
         kwargs["config"] = self.core.config
+        kwargs["lang"] = self.core.lang
         return self.env.get_template(template).render(**kwargs)
 
     @cherrypy.expose
@@ -21,12 +22,16 @@ class WebSettings():
 
         if "update_account" in kwargs:
             if kwargs["password"] != kwargs["password_repeat"]:
-                self.render("/settings/settings.html", account=account, error="Passwords does not match")
+                self.render("/settings/settings.html", account=account, error=self.core.lang.get("error_passwords_not_match"))
             if kwargs["password"] != "": account.password = Account.hash_password(kwargs["password"])
             account.email = kwargs["email"]
             account.commit()
             self.core.accounts.logout_user(account)
-            return self.render("/settings/settings.html", account=account, success="Account updated")
+            return self.render("/settings/settings.html", account=account, success=self.core.lang.get("success_account_updated"))
+
+        if "reload_lang" in kwargs:
+            self.core.lang.load()
+            return self.render("/settings/settings.html", account=account, success=self.core.lang.get("success_lang_files_reloaded"))
 
         elif "update_config" in kwargs:
             self.core.config.set("colorize_field_tile", kwargs["colorize_field_tile"] == "1", False)
@@ -35,8 +40,10 @@ class WebSettings():
             self.core.config.set("host", kwargs["host"], False)
             self.core.config.set("page_title", kwargs["page_title"], False)
             self.core.config.set("show_update_time", kwargs["show_update_time"] == "1", True)
+            self.core.config.set("about_page", kwargs["about_page"], False)
+            self.core.config.set("language", kwargs["language"], False)
             self.core.config.save()
-            return self.render("/settings/settings.html", account=account, success="Settings updated")
+            return self.render("/settings/settings.html", account=account, success=self.core.lang.get("success_settings_updated"))
 
         return self.render("/settings/settings.html", account=account)
 
@@ -46,16 +53,16 @@ class WebSettings():
             if self.core.accounts.login_user(kwargs["user"], kwargs["pass"]):
                 raise cherrypy.HTTPRedirect("/settings")
             else:
-                return self.render("/settings/login.html", error="Wrong username or password")
+                return self.render("/settings/login.html", error=self.core.lang.get("error_wrong_username_or_password"))
 
         return self.render("/settings/login.html")
 
     @cherrypy.expose
     def logout(self):
         if self.core.accounts.logout_user():
-            return self.render("home.html", success="Logged out")
+            return self.render("home.html", success=self.core.lang.get("success_logged_out"))
         else:
-            return self.render("home.html", error="Failed to log out")
+            return self.render("home.html", error=self.core.lang.get("error_logout_failed"))
 
     @cherrypy.expose
     def tools(self):
@@ -101,7 +108,7 @@ class WebSettings():
                 formatted_log += line
                 formatted_log += "</div>"
 
-        return self.env.get_template('/settings/log.html').render(files=files, log_file=log_file, log=formatted_log, config=self.core.config)
+        return self.render('/settings/log.html', files=files, log_file=log_file, log=formatted_log)
 
     @cherrypy.expose
     def sensors(self, **kwargs):
@@ -113,9 +120,15 @@ class WebSettings():
             if kwargs["action"] == "add":
                 if self.core.sensors.add(title=kwargs["title"], description=kwargs["description"]):
                     active_sensors = self.core.sensors.get_all(SensorStatus.ACTIVE)
-                    return self.render("/settings/sensors.html", active_sensors=active_sensors,inactive_sensors=inactive_sensors , success="Sensor added")
+                    return self.render("/settings/sensors.html",
+                                       active_sensors=active_sensors,
+                                       inactive_sensors=inactive_sensors ,
+                                       success=self.core.lang.get("success_sensor_added"))
                 else:
-                    return self.render("/settings/sensors.html", active_sensors=active_sensors,inactive_sensors=inactive_sensors , error="Failed to add sensor")
+                    return self.render("/settings/sensors.html",
+                                       active_sensors=active_sensors,
+                                       inactive_sensors=inactive_sensors ,
+                                       error=self.core.lang.get("error_sensor_add_failed"))
 
         return self.render("/settings/sensors.html", active_sensors=active_sensors,inactive_sensors=inactive_sensors)
 
@@ -129,24 +142,24 @@ class WebSettings():
                 sensor.title = kwargs["title"]
                 sensor.description = kwargs["description"]
                 sensor.commit()
-                return self.render("/settings/sensor.html", sensor=sensor, success="Sensor updated")
+                return self.render("/settings/sensor.html", sensor=sensor, success=self.core.lang.get("success_sensor_updated"))
             elif kwargs["action"] == "regen":
                 sensor.set_token()
                 sensor.commit()
-                return self.render("/settings/sensor.html", sensor=sensor, success="Sensor token regenerated")
+                return self.render("/settings/sensor.html", sensor=sensor, success=self.core.lang.get("success_sensor_token_regenerated"))
             elif kwargs["action"] == "remove":
                 if self.core.sensors.remove(sensor.sid):
-                    return self.render("/settings/sensors.html", sensors = self.core.sensors.sensors, success="Sensor removed")
+                    return self.render("/settings/sensors.html", sensors = self.core.sensors.sensors, success=self.core.lang.get("success_sensor_removed"))
                 else:
-                    return self.render("/settings/sensors.html", sensors = self.core.sensors.sensors, error="Failed to remove sensor")
+                    return self.render("/settings/sensors.html", sensors = self.core.sensors.sensors, error=self.core.lang.get("error_sensor_remove_failed"))
             elif kwargs["action"] == "enable":
                 sensor.status = SensorStatus.ACTIVE
                 sensor.commit()
-                return self.render("/settings/sensor.html", sensor=sensor, success="Sensor successfuly enabled")
+                return self.render("/settings/sensor.html", sensor=sensor, success=self.core.lang.get("success_sensor_enabled"))
             elif kwargs["action"] == "disable":
                 sensor.status = SensorStatus.INACTIVE
                 sensor.commit()
-                return self.render("/settings/sensor.html", sensor=sensor, success="Sensor disabled")
+                return self.render("/settings/sensor.html", sensor=sensor, success=self.core.lang.get("success_sensor_disabled"))
             elif kwargs["action"] == "update_field":
                 field = Field.get(fid=int(kwargs["fid"]))[0]
                 field.display_name = kwargs["display_name"]
@@ -154,12 +167,12 @@ class WebSettings():
                 field.icon = kwargs["icon"]
                 field.color = kwargs["color"]
                 field.commit()
-                return self.render("/settings/sensor.html", sensor=sensor, success="Field updated")
+                return self.render("/settings/sensor.html", sensor=sensor, success=self.core.lang.get("success_field_updated"))
             elif kwargs["action"] == "remove_field":
                 if Field.remove(int(kwargs["fid"])):
-                    return self.render("/settings/sensor.html", sensor=sensor, success="Field removed")
+                    return self.render("/settings/sensor.html", sensor=sensor, success=self.core.lang.get("success_field_removed"))
                 else:
-                    return self.render("/settings/sensor.html", sensor=sensor, error="Failed to remove field")
+                    return self.render("/settings/sensor.html", sensor=sensor, error=self.core.lang.get("error_field_remove_failed"))
 
 
         return self.render("/settings/sensor.html", sensor=sensor)

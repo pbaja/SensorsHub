@@ -6,7 +6,7 @@
     <script>
         $(document).ready(function(){
             $(".show-warn-msg").click(function(event){
-                var msg = "Are you sure that you want to do this? THIS CANNOT BE UNDONE! BE CAREFUL.";
+                var msg = "{{ lang.get("settings_warning_popup") }}";
                 if(window.confirm(msg)) {
                     return true;
                 } else {
@@ -22,37 +22,37 @@
     <form action="/settings/sensor/" method="POST">
         <input type="hidden" name="action" value="update_sensor"/>
         <input type="hidden" name="sid" value="{{ sensor.sid }}"/>
-        <h2>Sensor settings</h2>
+        <h2>{{ lang.get("sensor_settings") }}</h2>
         <table>
             <tr>
-                <th scope="col">Sensor ID</th>
+                <th scope="col">{{ lang.get("sensor_sensor_id") }}</th>
                 <td><input class="wide" type="text" disabled="1" value="{{ sensor.sid }}"/></td>
             </tr>
             <tr>
-                <th scope="col">Token</th>
+                <th scope="col">{{ lang.get("sensor_token") }}</th>
                 <td><input class="wide" type="text" disabled="1" value="{{ sensor.token }}"/></td>
             </tr>
             <tr>
-                <th scope="col">Last update</th>
+                <th scope="col">{{ lang.get("sensor_last_update") }}</th>
                 <td><input class="wide" type="text" disabled="1" value="{% if sensor.updated %}{{ sensor.updated | strftime }}{% else %}Never{% endif %}"/></td>
             </tr>
             <tr>
-                <th scope="col">Title</th>
+                <th scope="col">{{ lang.get("sensor_title") }}</th>
                 <td><input class="wide" name="title" type="text" value="{{ sensor.title }}"/></td>
             </tr>
             <tr>
-                <th scope="col">Description</th>
+                <th scope="col">{{ lang.get("sensor_description") }}</th>
                 <td><input class="wide" name="description" type="text" value="{{ sensor.description }}"/></td>
             </tr>
             <tr>
-                <th>Actions</th>
+                <th>{{ lang.get("sensor_actions") }}</th>
                 <td>
-                    <input class="button smaller" type="submit" value="Update sensor"/>
+                    <input class="button smaller" type="submit" value="{{ lang.get("sensor_button_update") }}"/>
                     {% if sensor.status == 0 %}
-                    <a class="button smaller" href="/settings/sensor?sid={{ sensor.sid }}&action=disable">Disable</a>
+                    <a class="button smaller" href="/settings/sensor?sid={{ sensor.sid }}&action=disable">{{ lang.get("sensor_button_disable") }}</a>
                     {% endif %}
-                    <a class="show-warn-msg button smaller warning" href="/settings/sensor?sid={{ sensor.sid }}&action=regen">Regenerate token</a>
-                    <a class="show-warn-msg button smaller error" href="/settings/sensor?sid={{ sensor.sid }}&action=remove">Remove sensor</a>
+                    <a class="show-warn-msg button smaller warning" href="/settings/sensor?sid={{ sensor.sid }}&action=regen">{{ lang.get("sensor_button_regenerate_token") }}</a>
+                    <a class="show-warn-msg button smaller error" href="/settings/sensor?sid={{ sensor.sid }}&action=remove">{{ lang.get("sensor_button_remove_sensor") }}</a>
                 </td>
             </tr>
         </table>
@@ -64,37 +64,37 @@
         <input type="hidden" name="action" value="update_field"/>
         <input type="hidden" name="sid" value="{{ sensor.sid }}"/>
         <input type="hidden" name="fid" value="{{ field.fid }}"/>
-        <h2>Sensor Field</h2>
+        <h2>{{ lang.get("sensor_field") }}</h2>
         <table>
             <tr>
-                <th scope="col">Field ID</th>
+                <th scope="col">{{ lang.get("sensor_field_id") }}</th>
                 <td><input class="wide" type="text" disabled="1" value="{{ field.fid }}"/></td>
             </tr>
             <tr>
-                <th scope="col">Name</th>
+                <th scope="col">{{ lang.get("sensor_field_name") }}</th>
                 <td><input class="wide" type="text" disabled="1" value="{{ field.name }}"/></td>
             </tr>
             <tr>
-                <th scope="col">Display name</th>
+                <th scope="col">{{ lang.get("sensor_field_display_name") }}</th>
                 <td><input class="wide" name="display_name" type="text" value="{{ field.display_name }}"/></td>
             </tr>
             <tr>
-                <th scope="col">Unit</th>
+                <th scope="col">{{ lang.get("sensor_field_unit") }}</th>
                 <td><input class="wide" name="unit" type="text" value="{{ field.unit }}"/></td>
             </tr>
             <tr>
-                <th scope="col">Icon</th>
+                <th scope="col">{{ lang.get("sensor_field_icon") }}</th>
                 <td><input class="wide" name="icon" type="text" value="{{ field.icon }}"/></td>
             </tr>
             <tr>
-                <th scope="col">Color</th>
+                <th scope="col">{{ lang.get("sensor_field_color") }}</th>
                 <td><input class="wide" name="color" type="color" value="{{ field.color }}"/></td>
             </tr>
             <tr>
-                <th>Actions</th>
+                <th>{{ lang.get("sensor_field_actions") }}</th>
                 <td>
-                    <input class="button smaller" type="submit" value="Update field"/>
-                    <a class="show-warn-msg button warning smaller" href="/sensors/?action=remove_field&fid={{ field.fid }}">Remove field</a>
+                    <input class="button smaller" type="submit" value="{{ lang.get("sensor_field_button_update") }}"/>
+                    <a class="show-warn-msg button warning smaller" href="/sensors/?action=remove_field&fid={{ field.fid }}">{{ lang.get("sensor_field_button_remove") }}</a>
                 </td>
             </tr>
         </table>

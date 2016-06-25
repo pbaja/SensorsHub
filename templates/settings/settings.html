@@ -5,7 +5,7 @@
         confirmed = [];
         function warn(obj) {
             if(confirmed.lastIndexOf(obj) !== -1) return true;
-            var msg = "Changing this can result in loosing access to the website. This option is only for advanced users. Are you sure that you want to edit this?";
+            var msg = "{{ lang.get("settings_server_warning_popup") }}";
             var confirm = window.confirm(msg);
             if(confirm) confirmed.push(obj);
             console.log(confirmed);
@@ -15,97 +15,119 @@
 {% endblock %}
 {% block content %}
 <section>
-    <h2>Your Account</h2>
+    <h2>{{ lang.get("settings_your_account") }}</h2>
     <form action="/settings/" method="POST">
         <table>
             <tr>
-                <td>Username</td>
+                <td>{{ lang.get("settings_username") }}</td>
                 <td><input class="wide" type="text" disabled="1" value="{{ account.user }}"/></td>
             </tr>
             <tr>
-                <td>Password</td>
-                <td><input class="wide" type="password" name="password" placeholder="New password"/></td>
+                <td>{{ lang.get("settings_new_password") }}</td>
+                <td><input class="wide" type="password" name="password" placeholder="{{ lang.get("settings_new_password") }}"/></td>
             </tr>
             <tr>
-                <td>Repeat password</td>
-                <td><input class="wide" type="password" name="password_repeat" placeholder="Repeat password"/></td>
+                <td>{{ lang.get("settings_repeat_password") }}</td>
+                <td><input class="wide" type="password" name="password_repeat" placeholder="{{ lang.get("settings_repeat_password") }}"/></td>
             </tr>
             <tr>
-                <td>Email</td>
+                <td>{{ lang.get("settings_email") }}</td>
                 <td><input class="wide" type="email" name="email" value="{{ account.email }}" /></td>
             </tr>
         </table>
-        <input class="button" type="submit" name="update_account" value="Update" />
+        <input class="button" type="submit" name="update_account" value="{{ lang.get("settings_button_update") }}" />
     </form>
 </section>
 <section>
-    <h2>Configuration</h2>
+    <h2>{{ lang.get("settings_configuration") }}</h2>
     <form action="/settings/" method="POST">
         <table>
-            <tr><th><div class="title">Basic settings</div></th></tr>
+            <tr><th><div class="title">{{ lang.get("settings_basic_settings") }}</div></th></tr>
             <tr>
                 <td>
-                    Title<br>
-                    <span class="setting-description">Displayed on the top left corner, and in the browser's title bar</span>
+                    {{ lang.get("settings_title") }}<br>
+                    <span class="setting-description">{{ lang.get("settings_title_desc") }}</span>
                 </td>
                 <td>
-                    <input type="text" class="wide" name="page_title" placeholder="Page title" value="{{ config.get("page_title", "SensorsHub") }}" />
+                    <input type="text" class="wide" name="page_title" placeholder="{{ lang.get("settings_title") }}" value="{{ config.get("page_title") }}" />
                 </td>
-            </tr>
-            <tr><th><div class="title">Server settings</div></th></tr>
-            <tr>
-                <td>
-                    Web server host<br>
-                    <span class="setting-description">Host at which Web server is listening, including /api, defualt '0.0.0.0' which means any interface</span>
-                </td>
-                <td><input class="wide" onkeydown="warn(this)" type="text" name="host" value="{{ config.get("host", "0.0.0.0") }}"/></td>
             </tr>
             <tr>
                 <td>
-                    Web server port<br>
-                    <span class="setting-description">Port at which Web server is listening, including /api, defualt '80'</span>
+                    {{ lang.get("settings_about_page") }}<br>
+                    <span class="setting-description">{{ lang.get("settings_about_page_desc") }}</span>
                 </td>
-                <td><input class="wide" onkeydown="warn(this)" type="number" name="port" value="{{ config.get("port", 80) }}"/></td>
+                <td>
+                    <textarea name="about_page" class="wide">{{ config.get("about_page") }}</textarea>
+                </td>
             </tr>
-            <tr><th><div class="title">Appearance settings</div></th></tr>
             <tr>
                 <td>
-                    Theme<br>
-                    <span class="setting-description">Light or Dark theme</span>
+                    {{ lang.get("settings_language") }}
+                </td>
+                <td>
+                    <select class="wide" name="language">
+                        {% for key, val in lang.langs.items() %}
+                            <option value="{{key}}" {% if key == config.get("language") %}selected{% endif %}>{{ val.name }} ({{ val.english_name }})</option>
+                        {% endfor %}
+                    </select><br>
+                    <a href="/settings/?reload_lang=1">{{ lang.get("settings_language_reload") }}</a>
+                </td>
+            </tr>
+            <tr><th><div class="title">{{ lang.get("settings_server_settings") }}</div></th></tr>
+            <tr>
+                <td>
+                    {{ lang.get("settings_web_server_host") }}<br>
+                    <span class="setting-description">{{ lang.get("settings_web_server_host_desc") }}</span>
+                </td>
+                <td><input class="wide" onkeydown="warn(this)" type="text" name="host" value="{{ config.get("host") }}"/></td>
+            </tr>
+            <tr>
+                <td>
+                    {{ lang.get("settings_web_server_port") }}<br>
+                    <span class="setting-description">{{ lang.get("settings_web_server_port_desc") }}</span>
+                </td>
+                <td><input class="wide" onkeydown="warn(this)" type="number" name="port" value="{{ config.get("port") }}"/></td>
+            </tr>
+            <tr><th><div class="title">{{ lang.get("settings_appearance_settings") }}</div></th></tr>
+            <tr>
+                <td>
+                    {{ lang.get("settings_theme") }}<br>
+                    <span class="setting-description">{{ lang.get("settings_theme_desc") }}</span>
                 </td>
                 <td>
                     <select class="wide" name="dark_theme">
-                        <option value="0" {% if not config.get("dark_theme", False) %}selected{% endif %}>Light</option>
-                        <option value="1" {% if config.get("dark_theme", False) %}selected{% endif %}>Dark</option>
+                        <option value="0" {% if not config.get("dark_theme") %}selected{% endif %}>{{ lang.get("settings_theme_light") }}</option>
+                        <option value="1" {% if config.get("dark_theme") %}selected{% endif %}>{{ lang.get("settings_theme_dark") }}</option>
                     </select>
                 </td>
             </tr>
             <tr>
                 <td>
-                    Show update time on tiles<br>
-                    <span class="setting-description">Decide whether show or hide field update time on tiles</span>
+                    {{ lang.get("settings_show_update_time") }}<br>
+                    <span class="setting-description">{{ lang.get("settings_show_update_time_desc") }}</span>
                 </td>
                 <td>
                     <select class="wide" name="show_update_time">
-                        <option value="0" {% if not config.get("show_update_time", True) %}selected{% endif %}>Hide</option>
-                        <option value="1" {% if config.get("show_update_time", True) %}selected{% endif %}>Show</option>
+                        <option value="0" {% if not config.get("show_update_time") %}selected{% endif %}>{{ lang.get("settings_show_update_time_hide") }}</option>
+                        <option value="1" {% if config.get("show_update_time") %}selected{% endif %}>{{ lang.get("settings_show_update_time_show") }}</option>
                     </select>
                 </td>
             </tr>
             <tr>
                 <td>
-                    Use field color for tiles background<br>
-                    <span class="setting-description">If enabled, tiles on home page will have field color instead of default one</span>
+                    {{ lang.get("settings_colorize_field_tiles") }}<br>
+                    <span class="setting-description">{{ lang.get("settings_colorize_field_tiles_desc") }}</span>
                 </td>
                 <td>
                     <select class="wide" name="colorize_field_tile">
-                        <option value="0" {% if not config.get("colorize_field_tile", False) %}selected{% endif %}>No</option>
-                        <option value="1" {% if config.get("colorize_field_tile", False) %}selected{% endif %}>Yes</option>
+                        <option value="0" {% if not config.get("colorize_field_tile") %}selected{% endif %}>{{ lang.get("settings_no") }}</option>
+                        <option value="1" {% if config.get("colorize_field_tile") %}selected{% endif %}>{{ lang.get("settings_yes") }}</option>
                     </select>
                 </td>
             </tr>
         </table>
-        <input class="button" type="submit" name="update_config" value="Update" />
+        <input class="button" type="submit" name="update_config" value="{{ lang.get("settings_button_update") }}" />
     </form>
 </section>
 {% endblock%}

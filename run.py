@@ -10,12 +10,13 @@ from jinja2 import Environment, FileSystemLoader
 from libs.accounts import Accounts
 from libs.sensors import Sensors
 from libs.config import Config
+from libs.lang import Lang
 from libs.web import WebRoot
 from libs.settings import WebSettings
 
 class Core(object):
 
-    VERSION = 0.00
+    VERSION = 0.01
 
     def __init__(self):
         print("")
@@ -107,6 +108,10 @@ class Core(object):
         self.config = Config()
         self.config.load()
 
+        # Load lang
+        self.lang = Lang(self)
+        self.lang.load()
+
         # Create and read sensors from database
         self.sensors = Sensors()
         self.sensors.load()
@@ -130,8 +135,8 @@ class Core(object):
 
         # Configure web server
         cherrypy_config = {
-            "server.socket_port": self.config.get("port", 80),
-            "server.socket_host": self.config.get("host", "0.0.0.0"),
+            "server.socket_port": self.config.get("port"),
+            "server.socket_host": self.config.get("host"),
             "checker.check_skipped_app_config": False,
             "log.screen": False,
             "log.access_file": '',

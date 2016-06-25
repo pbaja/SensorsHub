@@ -5,7 +5,7 @@
         confirmed = [];
         function warn(obj) {
             if(confirmed.lastIndexOf(obj) !== -1) return true;
-            var msg = "Changing this can result in loosing access to the website. This option is only for advanced users. Are you sure that you want to edit this?";
+            var msg = "{{ lang.get("settings_server_warning_popup") }}";
             var confirm = window.confirm(msg);
             if(confirm) confirmed.push(obj);
             console.log(confirmed);
@@ -15,7 +15,7 @@
 {% endblock %}
 {% block content %}
 <section>
-    <h2>All sensors</h2>
+    <h2>{{ lang.get("settings_all_sensors") }}</h2>
     <table class="sensors-table">
     {% if active_sensors %}
         {% for sensor in active_sensors %}
@@ -23,38 +23,38 @@
             <td>{{ sensor.title }}</td>
             <td>{{ sensor.description }}</td>
             <td>
-                <a class="button smaller" href="/settings/sensor?sid={{ sensor.sid }}">Edit sensor</a>
+                <a class="button smaller" href="/settings/sensor?sid={{ sensor.sid }}">{{ lang.get("settings_edit_sensor") }}</a>
             </td>
             </tr>
         {% endfor %}
     {% else %}
-        <tr><th><div class="setting-description">No active sensors found</div></th></tr>
+        <tr><th><div class="setting-description">{{ lang.get("settings_no_enabled_sensors") }}</div></th></tr>
     {% endif %}
-    <tr><th><div class="title">Disabled sensors</div></th></tr>
+    <tr><th><div class="title">{{ lang.get("settings_disabled_sensors") }}</div></th></tr>
     {% if inactive_sensors %}
         {% for sensor in inactive_sensors %}
             <tr>
             <td>{{ sensor.title }}</td>
             <td>{{ sensor.description }}</td>
             <td>
-                <a class="button smaller" href="/settings/sensor?sid={{ sensor.sid }}">Edit</a>
-                <a class="button smaller" href="/settings/sensor?sid={{ sensor.sid }}&action=enable">Enable</a>
-                <a class="button smaller" href="/settings/sensor?sid={{ sensor.sid }}&action=remove">Remove</a>
+                <a class="button smaller" href="/settings/sensor?sid={{ sensor.sid }}">{{ lang.get("settings_edit") }}</a>
+                <a class="button smaller" href="/settings/sensor?sid={{ sensor.sid }}&action=enable">{{ lang.get("settings_enable") }}</a>
+                <a class="button smaller" href="/settings/sensor?sid={{ sensor.sid }}&action=remove">{{ lang.get("settings_remove") }}</a>
             </td>
             </tr>
         {% endfor %}
     {% else %}
-        <tr><th><div class="setting-description">No inactive sensors found</div></th></tr>
+        <tr><th><div class="setting-description">{{ lang.get("settings_no_disabled_sensors") }}</div></th></tr>
     {% endif %}
     </table>
 </section>
 <section>
-    <h2>Add new sensor manually</h2>
+    <h2>{{ lang.get("settings_add_new_sensor") }}</h2>
     <form action="/settings/sensors/" method="POST">
-        <input class="wide" type="text" name="title" placeholder="Title" /><br>
-        <input class="wide" type="text" name="description" placeholder="Description" /><br>
+        <input class="wide" type="text" name="title" placeholder="{{ lang.get("settings_title") }}" /><br>
+        <input class="wide" type="text" name="description" placeholder="{{ lang.get("settings_description") }}" /><br>
         <input type="hidden" name="action" value="add" />
-        <input class="Button" type="submit" value="Create sensor" /><br>
+        <input class="Button" type="submit" value="{{ lang.get("settings_button_create_sensor") }}" /><br>
     </form>
 </section>
 {% endblock%}
