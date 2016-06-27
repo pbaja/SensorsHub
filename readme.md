@@ -47,4 +47,4 @@
  - [ ] Multiple field types: bool, int, float, percent  
  - [ ] Comparing data for multiple periods from multiple fields  
  - [ ] More API functions for developers (Getting data from database, modifying)  
- - [ ] Auto update
+ - [x] Auto update

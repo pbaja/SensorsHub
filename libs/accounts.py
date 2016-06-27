@@ -106,19 +106,20 @@ class Accounts(object):
 
     def logout_user(self, account=None):
         """Logs out user, including destroying cookies and removing user from loaded accounts"""
-        # Remove user sesion key
-        account.session = ""
-        account.commit()
-        # Remove user from list
-        account = self.verify_user()
-        if account is not None:
-            self.accounts.remove(account)
         # Reset session key
         cherrypy.response.cookie["session"] = ""
         cherrypy.response.cookie["session"]["path"] = "/"
-        cherrypy.response.cookie["session"]["max-age"] = 3600 * 6
-        logging.info("User {} ({}) logged out".format(account.user, self.core.get_client_ip()))
-        return True
+        cherrypy.response.cookie["session"]["max-age"] = 0
+        # Remove user from list
+        account = self.verify_user()
+        if account is not None:
+            account.session = ""
+            account.commit()
+            self.accounts.remove(account)
+            logging.info("User {} ({}) logged out".format(account.user, self.core.get_client_ip()))
+            return True
+        else:
+            return False
 
     def protect(self):
         """Use this function, when you want users to log in before accessing page"""

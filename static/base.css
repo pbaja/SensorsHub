@@ -153,13 +153,12 @@ footer, footer a {
 /* Messages */
 .message {
     margin: 5px 0 15px 0;
-    padding: 5px 10px;
-    border-left: 7px solid #FFF;
-    border-bottom: 2px solid #FFF;
+    padding: 10px 10px;
 }
-.message.success {  border-color: #7ad03a;  }
-.message.error {  border-color: #d43f3a;  }
-.message.warning {  border-color: #d58512;  }
+.message.success {  background-color: #58A500;  }
+.message.error {  background-color: #D43F3A;  }
+.message.warning {  background-color: #d58512;  }
+.message.info {  background-color: #0079C4;  }
 
 /* Font awesome vertical align fix */
 .fa {line-height: inherit;}

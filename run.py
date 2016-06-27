@@ -20,8 +20,6 @@ class Core(object):
     VERSION = 0.03
 
     def __init__(self):
-        print("")
-
         # Configure logger
         logFormatter = logging.Formatter(fmt="[%(asctime)-15s][%(levelname)s] %(message)s", datefmt='%d.%m.%Y %H:%M:%S')
         log = logging.getLogger()
@@ -116,14 +114,9 @@ class Core(object):
         # Load updater
         self.updater = Updater(self)
         if self.updater.check_updates():
-            logging.info("New update available. Current version: {}, latest: {}".format(self.VERSION, self.updater.version["latest"]))
             if "update" in self.config.args:
                 logging.info("Starting auto update")
                 self.updater.update()
-                logging.info("Done")
-                sys.exit(0)
-            else:
-                logging.info("If you want to update, run this script with --update option")
         else:
             logging.info("No updates available")
 

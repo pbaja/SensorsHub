@@ -99,6 +99,8 @@
     "settings_description": "Description",
     "settings_button_create_sensor": "Create sensor",
 
+    "settings_update_available": "New update is available! To begin autoupdate, start sensorshub with --update option",
+
     "sensor_settings": "Sensor settings",
     "sensor_sensor_id": "Sensor ID",
     "sensor_token": "Token",

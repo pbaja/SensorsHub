@@ -15,6 +15,10 @@ class WebSettings():
         """Gets template and kwargs passed as args, and returns rendered template"""
         kwargs["config"] = self.core.config
         kwargs["lang"] = self.core.lang
+
+        if self.core.updater.update_available and template != "/settings/login.html":
+            kwargs["info"] = self.core.lang.get("settings_update_available")
+
         return self.env.get_template(template).render(**kwargs)
 
     @cherrypy.expose
