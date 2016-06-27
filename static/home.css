@@ -8,7 +8,7 @@
     max-width: 300px;
     min-width: 220px;
     margin: 10px;
-    padding: 10px;
+    padding: 5px 10px;
 
     /* Shape of content */
     display: flex;
@@ -47,8 +47,9 @@
 .sensor-right a:hover, .sensor-right a.pushed {
     opacity: 0.5;
 }
-.sensor-title {  font-size: 1.25em;  }
-.sensor-about {  font-size: 0.75em;  }
+.sensor-title { font-size: 1.1em; }
+.sensor-value { font-size: 1.2em; font-weight: bold; }
+.sensor-about { font-size: 0.75em; }
 
 .loading {
     text-align: center;

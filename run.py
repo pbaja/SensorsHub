@@ -13,10 +13,11 @@ from libs.config import Config
 from libs.lang import Lang
 from libs.web import WebRoot
 from libs.settings import WebSettings
+from libs.updater import Updater
 
 class Core(object):
 
-    VERSION = 0.01
+    VERSION = 0.03
 
     def __init__(self):
         print("")
@@ -111,6 +112,20 @@ class Core(object):
         # Load lang
         self.lang = Lang(self)
         self.lang.load()
+
+        # Load updater
+        self.updater = Updater(self)
+        if self.updater.check_updates():
+            logging.info("New update available. Current version: {}, latest: {}".format(self.VERSION, self.updater.version["latest"]))
+            if "update" in self.config.args:
+                logging.info("Starting auto update")
+                self.updater.update()
+                logging.info("Done")
+                sys.exit(0)
+            else:
+                logging.info("If you want to update, run this script with --update option")
+        else:
+            logging.info("No updates available")
 
         # Create and read sensors from database
         self.sensors = Sensors()

@@ -62,14 +62,10 @@ class Sensor(object):
 
     def get_latest(self):
         """Get latest values from all fields"""
-        with sqlite3.connect("db.sqlite") as conn:
-            fields = self.get_fields()
-            for field in fields:
-                results = conn.execute("SELECT updated, value FROM readings WHERE fid=? ORDER BY updated DESC LIMIT 1", [field.fid]).fetchall()
-                if len(results) > 0:
-                    result = results[0]
-                    field.readings.append(Reading(self.sid,field.fid,result[0],result[1]))
-            return fields
+        fields = self.get_fields()
+        for field in fields:
+            field.readings.append(field.last_reading())
+        return fields
 
     def get_fields(self):
         """Returns list of fields without readings"""

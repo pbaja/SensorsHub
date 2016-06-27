@@ -1,6 +1,7 @@
 import os, json
 
 class Lang(object):
+    """Class contains functions responsible for language support, including loading and getting strings from language file"""
 
     def __init__(self, core):
         self.core = core

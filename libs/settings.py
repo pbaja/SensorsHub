@@ -5,19 +5,21 @@ from libs.fields import Field
 from libs.sensors import SensorStatus
 
 class WebSettings():
+    """Class responsible for rendering content for settings web page"""
 
     def __init__(self, core, env):
         self.core = core
         self.env = env
 
     def render(self, template, **kwargs):
+        """Gets template and kwargs passed as args, and returns rendered template"""
         kwargs["config"] = self.core.config
         kwargs["lang"] = self.core.lang
         return self.env.get_template(template).render(**kwargs)
 
     @cherrypy.expose
     def index(self, **kwargs):
-        """Settings page"""
+        """Settings web page, available at /settings"""
         account = self.core.accounts.protect()
 
         if "update_account" in kwargs:
@@ -42,6 +44,9 @@ class WebSettings():
             self.core.config.set("show_update_time", kwargs["show_update_time"] == "1", True)
             self.core.config.set("about_page", kwargs["about_page"], False)
             self.core.config.set("language", kwargs["language"], False)
+            self.core.config.set("chart_point_radius", int(kwargs["chart_point_radius"]), False)
+            self.core.config.set("chart_generate_average", kwargs["chart_generate_average"] == "1", False)
+            self.core.config.set("chart_fill", kwargs["chart_fill"] == "1", False)
             self.core.config.save()
             return self.render("/settings/settings.html", account=account, success=self.core.lang.get("success_settings_updated"))
 
@@ -49,6 +54,7 @@ class WebSettings():
 
     @cherrypy.expose
     def login(self, **kwargs):
+        """Login web page, available at /settings/login"""
         if "user" in kwargs and "pass" in kwargs:
             if self.core.accounts.login_user(kwargs["user"], kwargs["pass"]):
                 raise cherrypy.HTTPRedirect("/settings")
@@ -59,6 +65,7 @@ class WebSettings():
 
     @cherrypy.expose
     def logout(self):
+        """Logout web page, available at /settings/logout"""
         if self.core.accounts.logout_user():
             return self.render("home.html", success=self.core.lang.get("success_logged_out"))
         else:
@@ -66,6 +73,7 @@ class WebSettings():
 
     @cherrypy.expose
     def tools(self):
+        """Tools web page, available at /settings/tools"""
         self.core.accounts.protect()
 
         with sqlite3.connect("db.sqlite") as conn:
@@ -79,6 +87,7 @@ class WebSettings():
 
     @cherrypy.expose
     def log(self, **kwargs):
+        """Log web page, available at /settings/log"""
         self.core.accounts.protect()
 
         # Load all files from dir and sort them by modification date
@@ -112,6 +121,7 @@ class WebSettings():
 
     @cherrypy.expose
     def sensors(self, **kwargs):
+        """Sensors web page, available at /settings/sensors"""
         self.core.accounts.protect()
         active_sensors = self.core.sensors.get_all(status=SensorStatus.ACTIVE)
         inactive_sensors = self.core.sensors.get_all(status=SensorStatus.INACTIVE)
@@ -134,6 +144,7 @@ class WebSettings():
 
     @cherrypy.expose
     def sensor(self, **kwargs):
+        """Single sensor web page, available at /settings/sensor/SENSORID"""
         self.core.accounts.protect()
         sensor = self.core.sensors.get_single(sid=int(kwargs["sid"]))
 

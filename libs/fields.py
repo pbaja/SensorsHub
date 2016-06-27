@@ -14,7 +14,6 @@ class Field(object):
         self.name = name
         self.unit = unit
         self.updated = updated
-        self.value = None
         self.readings = []
 
         if display_name:
@@ -67,8 +66,8 @@ class Field(object):
             else:
                 return None
 
-    @staticmethod
-    def create(sid, name, unit=None, display_name=None, icon=None, color=None):
+    @classmethod
+    def create(cls, sid, name, unit=None, display_name=None, icon=None, color=None):
         """Create new field in database and return it"""
         into = ["sid", "name"]
         values = [sid, name]
@@ -93,7 +92,7 @@ class Field(object):
 
         with sqlite3.connect("db.sqlite") as conn:
             result = conn.execute("INSERT INTO fields ("+",".join(into)+") VALUES ("+",".join(["?"] * len(into))+")", values)
-            return Field(sid, result.lastrowid, name, unit, display_name, style, time.time())
+            return cls(sid, result.lastrowid, name, unit, display_name, style, time.time())
 
     def get_readings(self, group_minutes="1S", date_from=None, date_to=None):
         """Returns array with readings associated with this field (also stores them in field.readings)"""
@@ -146,3 +145,11 @@ class Field(object):
             return time.time() - self.updated
         else:
             return 0
+
+    def last_reading(self):
+        """Returns last reading"""
+        with sqlite3.connect("db.sqlite") as conn:
+            results = conn.execute("SELECT updated, value FROM readings WHERE fid=? ORDER BY updated DESC LIMIT 1",[self.fid]).fetchall()
+        if len(results) > 0:
+            result = results[0]
+            return Reading(self.sid, self.fid, result[0], result[1])

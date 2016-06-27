@@ -5,12 +5,14 @@ from libs.graphs import Graph
 from libs.fields import Field
 
 class WebRoot(object):
+    """Class responsible for rendering content for main web page"""
 
     def __init__(self, core, env):
         self.core = core
         self.env = env
 
     def render(self, template, **kwargs):
+        """Gets template and kwargs passed as args, and returns rendered template"""
         kwargs["config"] = self.core.config
         kwargs["lang"] = self.core.lang
         return self.env.get_template(template).render(**kwargs)
@@ -52,29 +54,45 @@ class WebRoot(object):
         if settings["range"]: date_from = date_to - (60 * 60 * int(settings["range"]))
         else: settings["range"] = "24"
 
+        # Custom config
+        datasetConfig = {
+            "pointRadius": self.core.config.get("chart_point_radius"),
+            "fill": self.core.config.get("chart_fill"),
+            "pointHitRadius": 10
+        }
+
         # Generate data
-        fields, data = Graph.generate(fids, settings["group"], date_from=date_from, date_to=date_to, return_fields=True)
+        fields, data = Graph.generate(fids,
+                                      settings["group"],
+                                      date_from=date_from,
+                                      date_to=date_to,
+                                      return_fields=True,
+                                      datasetConfig=datasetConfig,
+                                      generateAverage=self.core.config.get("chart_generate_average")
+                                      )
 
         for field in fields:
             field.min = min(field.readings, key=lambda f: f.value).value
             field.max = max(field.readings, key=lambda f: f.value).value
 
-        return self.render('single.html', fids=fids, sensor=sensor, fields=fields, settings=settings, data=json.dumps(data))
+        return self.render('single.html',fids=fids,sensor=sensor,fields=fields,settings=settings,data=json.dumps(data))
 
     @cherrypy.expose
     def about(self):
+        """About page, content of it is configurable in settings"""
         about_page = markdown2.markdown(self.core.config.get("about_page"))
         return self.render('about.html', about_page=about_page)
 
     @cherrypy.expose
     def api(self, *raw_args, **kwargs):
-        """API"""
+        """API, always returns JSON data"""
 
         # Get arguments
         args = {}
         for arg in raw_args:
             arg = arg.split(",")
-            args[arg[0]] = arg[1]
+            if len(arg) > 1:
+                args[arg[0]] = arg[1]
 
         if not "action" in args:
             return json.dumps({"code": 100, "message": "action argument is needed"})
@@ -139,10 +157,6 @@ class WebRoot(object):
             if not "fields" in kwargs:
                 return json.dumps({"code": 120, "message": "fields argument is needed"})
 
-            fids = []
-            for fid in kwargs["fields"].split(","):
-                fids.append(int(fid))
-
             # Get settings from kwargs
             now = datetime.datetime.now()
             settings = {"group": "15M", "range": "24", "date": now.strftime("%Y-%m-%d"), "time": now.strftime("%H:%M")}
@@ -160,6 +174,47 @@ class WebRoot(object):
             else:
                 settings["range"] = "24"
 
+            # Custom config
+            datasetConfig = {
+                "pointRadius": self.core.config.get("chart_point_radius"),
+                "fill": self.core.config.get("chart_fill"),
+                "pointHitRadius": 10
+            }
+
             # Generate data
-            data = Graph.generate(fids, settings["group"], date_from=date_from, date_to=date_to, sensor_label = True, sensors=self.core.sensors)
+            data = Graph.generate(
+                map(int, kwargs["fields"]),
+                settings["group"],
+                date_from=date_from,
+                date_to=date_to,
+                sensor_label = True,
+                sensors=self.core.sensors,
+                datasetConfig=datasetConfig,
+                generateAverage=self.core.config.get("chart_generate_average")
+            )
             return json.dumps(data)
+
+        # Get current field value
+        elif args["action"] == "field_value":
+
+            # Get field ids
+            if not "fields" in kwargs:
+                return json.dumps({"code": 130, "message": "fields argument is needed"})
+
+            # If user supplied timestamp, get only readings updated sooner that that timestamp
+            timestamp = 0
+            if "timestamp" in kwargs:
+                timestamp = int(kwargs["timestamp"])
+
+            # Get all fields and last readings for them
+            fields = {}
+            for fid in kwargs["fields"]:
+                field = Field.get(fid=int(fid))[0]
+                if field is None:
+                    return json.dumps({"code": 131, "message": "Field with id {} not found".format(fid)})
+
+                reading = field.last_reading()
+                if reading.updated > timestamp:
+                    fields[fid] = reading.value
+
+            return json.dumps({"code": 30, "fields": fields})

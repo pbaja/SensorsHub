@@ -126,6 +126,37 @@
                     </select>
                 </td>
             </tr>
+            <tr>
+                <td>
+                    {{ lang.get("settings_chart_point_radius") }}<br>
+                    <span class="setting-description">{{ lang.get("settings_chart_point_radius_desc") }}</span>
+                </td>
+                <td><input class="wide" type="number" name="chart_point_radius" value="{{ config.get("chart_point_radius") }}"/></td>
+            </tr>
+            <tr>
+                <td>
+                    {{ lang.get("settings_generate_average") }}<br>
+                    <span class="setting-description">{{ lang.get("settings_generate_average_desc") }}</span>
+                </td>
+                <td>
+                    <select class="wide" name="chart_generate_average">
+                        <option value="0" {% if not config.get("chart_generate_average") %}selected{% endif %}>{{ lang.get("settings_no") }}</option>
+                        <option value="1" {% if config.get("chart_generate_average") %}selected{% endif %}>{{ lang.get("settings_yes") }}</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    {{ lang.get("settings_fill_under_line") }}<br>
+                    <span class="setting-description">{{ lang.get("settings_fill_under_line_desc") }}</span>
+                </td>
+                <td>
+                    <select class="wide" name="chart_fill">
+                        <option value="0" {% if not config.get("chart_fill") %}selected{% endif %}>{{ lang.get("settings_no") }}</option>
+                        <option value="1" {% if config.get("chart_fill") %}selected{% endif %}>{{ lang.get("settings_yes") }}</option>
+                    </select>
+                </td>
+            </tr>
         </table>
         <input class="button" type="submit" name="update_config" value="{{ lang.get("settings_button_update") }}" />
     </form>

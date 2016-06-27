@@ -6,5 +6,8 @@
   "about_page": "**This is default about page. Change it in settings.**",
   "page_title": "SensorsHub",
   "host": "0.0.0.0",
+  "chart_point_radius": 3,
+  "chart_generate_average": false,
+  "chart_fill": true,
   "port": 80
 }

@@ -78,18 +78,18 @@
             <div class="tag-right">
                 <select name="range">
                     {% set range = settings["range"] %}
-                    <option value="1" {% if range == "1" %}selected{% endif %}>Last 1 hour</option>
-                    <option value="3" {% if range == "3" %}selected{% endif %}>Last 3 hours</option>
-                    <option value="6" {% if range == "6" %}selected{% endif %}>Last 6 hours</option>
-                    <option value="12" {% if range == "12" %}selected{% endif %}>Last 12 hours</option>
-                    <option value="24" {% if range == "24" %}selected{% endif %}>Last 24 hours</option>
-                    <option value="48" {% if range == "48" %}selected{% endif %}>Last 2 days</option>
-                    <option value="96" {% if range == "96" %}selected{% endif %}>Last 4 days</option>
-                    <option value="168" {% if range == "168" %}selected{% endif %}>Last 7 days</option>
-                    <option value="336" {% if range == "336" %}selected{% endif %}>Last 14 days</option>
-                    <option value="744" {% if range == "744" %}selected{% endif %}>Last 31 days</option>
-                    <option value="2232" {% if range == "2232" %}selected{% endif %}>Last 3 months</option>
-                    <option value="8760" {% if range == "8760" %}selected{% endif %}>Last year</option>
+                    <option value="1" {% if range == "1" %}selected{% endif %}>{{ lang.get("date_last") }} 1 {{ lang.get("date_hour") }}</option>
+                    <option value="3" {% if range == "3" %}selected{% endif %}>{{ lang.get("date_last") }} 3 {{ lang.get("date_hours") }}</option>
+                    <option value="6" {% if range == "6" %}selected{% endif %}>{{ lang.get("date_last") }} 6 {{ lang.get("date_hours") }}</option>
+                    <option value="12" {% if range == "12" %}selected{% endif %}>{{ lang.get("date_last") }} 12 {{ lang.get("date_hours") }}</option>
+                    <option value="24" {% if range == "24" %}selected{% endif %}>{{ lang.get("date_last") }} 24 {{ lang.get("date_hours") }}</option>
+                    <option value="48" {% if range == "48" %}selected{% endif %}>{{ lang.get("date_last") }} 2 {{ lang.get("date_days") }}</option>
+                    <option value="96" {% if range == "96" %}selected{% endif %}>{{ lang.get("date_last") }} 4 {{ lang.get("date_days") }}</option>
+                    <option value="168" {% if range == "168" %}selected{% endif %}>{{ lang.get("date_last") }} 7 {{ lang.get("date_days") }}</option>
+                    <option value="336" {% if range == "336" %}selected{% endif %}>{{ lang.get("date_last") }} 14 {{ lang.get("date_days") }}</option>
+                    <option value="744" {% if range == "744" %}selected{% endif %}>{{ lang.get("date_last") }} 31 {{ lang.get("date_days") }}</option>
+                    <option value="2232" {% if range == "2232" %}selected{% endif %}>{{ lang.get("date_last") }} 3 {{ lang.get("date_months") }}</option>
+                    <option value="8760" {% if range == "8760" %}selected{% endif %}>{{ lang.get("date_last") }} {{ lang.get("date_year") }}</option>
                 </select>
             </div>
         </div>
@@ -104,17 +104,17 @@
             <div class="tag-title">{{ lang.get("single_average_by") }}</div>
             <select name="group">
                 {% set group = settings["group"] %}
-                <option value="1S" {% if group == "1S" %}selected{% endif %}>None</option>
-                <option value="5M" {% if group == "5M" %}selected{% endif %}>5 Minutes</option>
-                <option value="15M" {% if group == "15M" %}selected{% endif %}>15 Minutes</option>
-                <option value="30M" {% if group == "30M" %}selected{% endif %}>30 Minutes</option>
-                <option value="1H" {% if group == "1H" %}selected{% endif %}>1 Hour</option>
-                <option value="6H" {% if group == "6H" %}selected{% endif %}>6 Hours</option>
-                <option value="1d" {% if group == "1d" %}selected{% endif %}>1 Day</option>
-                <option value="7d" {% if group == "7d" %}selected{% endif %}>7 Days</option>
-                <option value="14d" {% if group == "14d" %}selected{% endif %}>14 Days</option>
-                <option value="1m" {% if group == "1m" %}selected{% endif %}>1 Month</option>
-                <option value="6m" {% if group == "6m" %}selected{% endif %}>6 Months</option>
+                <option value="1S" {% if group == "1S" %}selected{% endif %}>{{ lang.get("date_none") }}</option>
+                <option value="5M" {% if group == "5M" %}selected{% endif %}>5 {{ lang.get("date_minutes") }}</option>
+                <option value="15M" {% if group == "15M" %}selected{% endif %}>15 {{ lang.get("date_minutes") }}</option>
+                <option value="30M" {% if group == "30M" %}selected{% endif %}>30 {{ lang.get("date_minutes") }}</option>
+                <option value="1H" {% if group == "1H" %}selected{% endif %}>1 {{ lang.get("date_hour") }}</option>
+                <option value="6H" {% if group == "6H" %}selected{% endif %}>6 {{ lang.get("date_hours") }}</option>
+                <option value="1d" {% if group == "1d" %}selected{% endif %}>1 {{ lang.get("date_day") }}</option>
+                <option value="7d" {% if group == "7d" %}selected{% endif %}>7 {{ lang.get("date_days") }}</option>
+                <option value="14d" {% if group == "14d" %}selected{% endif %}>14 {{ lang.get("date_days") }}</option>
+                <option value="1m" {% if group == "1m" %}selected{% endif %}>1 {{ lang.get("date_month") }}</option>
+                <option value="6m" {% if group == "6m" %}selected{% endif %}>6 {{ lang.get("date_months") }}</option>
             </select>
         </div>
         <input class="tag gray" type="submit" value="{{ lang.get("single_button_update") }}" /><br>

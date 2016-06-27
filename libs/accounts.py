@@ -3,6 +3,7 @@ from cherrypy._cpcompat import base64_decode
 import cherrypy, random, string, time, sqlite3, logging
 
 class Account():
+    """Class containing one account"""
 
     def __init__(self, uid, user="", hashed_password="", email=""):
         self.uid = uid
@@ -34,11 +35,14 @@ class Account():
 
     @staticmethod
     def hash_password(password):
+        """Hash password using pbkdf2_sha256"""
         return pbkdf2_sha256.encrypt(password)
 
 class Accounts(object):
+    """Class containing functions for all acounts"""
 
     def __init__(self, core):
+        """Initialize variables and create default admin account if it does not exist"""
         self.core = core
         self.accounts = []
 
@@ -52,12 +56,14 @@ class Accounts(object):
                     logging.error("Failed to create admin account!")
 
     def get_user(self, user=None, uid=None):
+        """Returns Account from loaded accounts, based on username or uid"""
         for account in self.accounts:
             if account.user == user or account.uid == uid:
                 return account
         return None
 
     def login_user(self, user, password):
+        """Tries to login user using username and password, returns Account object when succeed, otherwise None"""
         # Check if user exist
         with sqlite3.connect("db.sqlite") as conn:
             result = conn.execute("SELECT uid, password, email FROM accounts WHERE user=?;", [user]).fetchall()
@@ -88,6 +94,7 @@ class Accounts(object):
         return None
 
     def create_user(self, user, password, email=""):
+        """Created new user based on supplied username, password, and/or email"""
         with sqlite3.connect("db.sqlite") as conn:
             hashed_pass = pbkdf2_sha256.encrypt(password)
             cur = conn.cursor()
@@ -98,21 +105,20 @@ class Accounts(object):
         return None
 
     def logout_user(self, account=None):
-        if account is None:
-            account = self.verify_user()
-        if account:
-            # Remove user sesion key
-            account.session = ""
-            account.commit()
-            # Remove user from list
+        """Logs out user, including destroying cookies and removing user from loaded accounts"""
+        # Remove user sesion key
+        account.session = ""
+        account.commit()
+        # Remove user from list
+        account = self.verify_user()
+        if account is not None:
             self.accounts.remove(account)
-            # Reset session key
-            cherrypy.response.cookie["session"] = ""
-            cherrypy.response.cookie["session"]["path"] = "/"
-            cherrypy.response.cookie["session"]["max-age"] = 3600 * 6
-            logging.info("User {} ({}) logged out".format(account.user, self.core.get_client_ip()))
-            return True
-        return False
+        # Reset session key
+        cherrypy.response.cookie["session"] = ""
+        cherrypy.response.cookie["session"]["path"] = "/"
+        cherrypy.response.cookie["session"]["max-age"] = 3600 * 6
+        logging.info("User {} ({}) logged out".format(account.user, self.core.get_client_ip()))
+        return True
 
     def protect(self):
         """Use this function, when you want users to log in before accessing page"""
@@ -122,6 +128,7 @@ class Accounts(object):
         return account
 
     def verify_user(self):
+        """Check user session, first search for cookies, and then chceck if they contains valid information, returns Account when succeed, None otherwise"""
         user = cherrypy.request.cookie.get("user")
         session = cherrypy.request.cookie.get("session")
         # Check if cookies exist
@@ -134,9 +141,7 @@ class Accounts(object):
                     return account
                 else:
                     # Session key is not correct, logout
-                    account.session = ""
-                    account.commit()
-                    self.accounts.remove(account)
+                    self.logout_user()
                     logging.warning("User {} ({}) is logged in, but cookie contains wrong token".format(account.user, self.core.get_client_ip()))
                     return None
         return None

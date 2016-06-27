@@ -2,9 +2,20 @@ import datetime, collections
 from libs.fields import Field
 
 class Graph(object):
+    """Class containing userful functions for charts"""
 
     @staticmethod
-    def generate(field_ids, group_by="15M", date_from=None, date_to=None, sensor_label=False, sensors=None, return_fields=False, prefix=""):
+    def generate(field_ids,
+                 group_by="15M",
+                 date_from=None,
+                 date_to=None,
+                 sensor_label=False,
+                 sensors=None,
+                 return_fields=False,
+                 prefix="",
+                 datasetConfig={},
+                 generateAverage=False):
+        """Generate chart data based on arguments"""
 
         # Group by
         group_labels = "%H:%M"
@@ -50,7 +61,8 @@ class Graph(object):
             label = field.display_name
             if sensor_label: label = sensors.get_single(sid=field.sid).title + " " + label
 
-            dataset = {"label": prefix+label, "data": [], "fill": False, "borderColor": field.color}
+            dataset = {"label": prefix+label, "data": [],  "borderColor": field.color}
+            dataset.update(datasetConfig)
             for values in y.values():
                 # Get value for exact field
                 for value in values:
@@ -63,22 +75,24 @@ class Graph(object):
             datasets.append(dataset)
 
         # Generate average
-        avg_dataset = {"label": "Average", "data": [], "fill": False, "borderColor": "#777"}
-        for i in range(len(labels)):
-            sum = 0
-            tot = 0
-            non = False
-            for dataset in datasets:
-                if dataset["data"][i] == None:
-                    non = True
-                    break
-                sum += dataset["data"][i]
-                tot += 1
+        if generateAverage:
+            avg_dataset = {"label": "average", "data": [], "borderColor": "#777"}
+            avg_dataset.update(datasetConfig)
+            for i in range(len(labels)):
+                sum = 0
+                tot = 0
+                non = False
+                for dataset in datasets:
+                    if dataset["data"][i] == None:
+                        non = True
+                        break
+                    sum += dataset["data"][i]
+                    tot += 1
 
-            if non: avg_dataset["data"].append(None)
-            else: avg_dataset["data"].append(sum / tot)
+                if non: avg_dataset["data"].append(None)
+                else: avg_dataset["data"].append(sum / tot)
 
-        datasets.append(avg_dataset)
+            datasets.append(avg_dataset)
 
         # Create data for chart
         data = {

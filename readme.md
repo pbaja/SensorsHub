@@ -3,6 +3,7 @@
 **Current version: ALPHA 0.01**  
 **Changelog: Not Yet Available**  
 **Documentation: [Wiki page](https://github.com/SkewPL/SensorsHub/wiki)**  
+**Live demo: [Here](http://sensors.skew.tk)**
   
 ## Features  
  - Light/Dark theme  
@@ -33,7 +34,7 @@
   
 ## TODO  
  - [x] Multiple languages support
- - [ ] Update home page field values with javascript  
+ - [x] Update home page field values with javascript  
  - [x] Make pairing with sensors more easly
  - [ ] Allow guests to change theme to dark/light  
  - [x] Better Sensors page, more readable  
