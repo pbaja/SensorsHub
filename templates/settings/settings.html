@@ -17,6 +17,7 @@
 <section>
     <h2>{{ lang.get("settings_your_account") }}</h2>
     <form action="/settings/" method="POST">
+        {% if account %}
         <table>
             <tr>
                 <td>{{ lang.get("settings_username") }}</td>
@@ -37,6 +38,9 @@
         </table>
         <input class="button" type="submit" name="update_account" value="{{ lang.get("settings_button_update") }}" />
     </form>
+    {% else %}
+            <div class="setting-description">{{ lang.get("settings_access_denied") }}</div>
+    {% endif %}
 </section>
 <section>
     <h2>{{ lang.get("settings_configuration") }}</h2>
@@ -72,6 +76,18 @@
                         {% endfor %}
                     </select><br>
                     <a href="/settings/?reload_lang=1">{{ lang.get("settings_language_reload") }}</a>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    {{ lang.get("settings_demo_mode") }}<br>
+                    <span class="setting-description">{{ lang.get("settings_demo_mode_desc") }}</span>
+                </td>
+                <td>
+                    <select class="wide" name="demo_mode">
+                        <option value="0" {% if not config.get("demo_mode") %}selected{% endif %}>{{ lang.get("settings_no") }}</option>
+                        <option value="1" {% if config.get("demo_mode") %}selected{% endif %}>{{ lang.get("settings_yes") }}</option>
+                    </select>
                 </td>
             </tr>
             <tr><th><div class="title">{{ lang.get("settings_server_settings") }}</div></th></tr>

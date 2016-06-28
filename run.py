@@ -14,10 +14,11 @@ from libs.lang import Lang
 from libs.web import WebRoot
 from libs.settings import WebSettings
 from libs.updater import Updater
+from libs.statistics import Statistics
 
 class Core(object):
 
-    VERSION = 0.03
+    VERSION = 0.04
 
     def __init__(self):
         # Configure logger
@@ -126,6 +127,9 @@ class Core(object):
 
         # Create and load accounts
         self.accounts = Accounts(self)
+
+        # Load statistics
+        self.statistics = Statistics(self)
 
         # Configure web template engine
         env = Environment(loader=FileSystemLoader('templates'))

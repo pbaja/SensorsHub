@@ -26,11 +26,11 @@
         <table>
             <tr>
                 <th scope="col">{{ lang.get("sensor_sensor_id") }}</th>
-                <td><input class="wide" type="text" disabled="1" value="{{ sensor.sid }}"/></td>
+                <td><input class="wide" type="text" disabled="1" value="{% if account %}{{ sensor.sid }}{% else %}{{ lang.get("settings_access_denied") }}{% endif %}"/></td>
             </tr>
             <tr>
                 <th scope="col">{{ lang.get("sensor_token") }}</th>
-                <td><input class="wide" type="text" disabled="1" value="{{ sensor.token }}"/></td>
+                <td><input class="wide" type="text" disabled="1" value="{% if account %}{{ sensor.token }}{% else %}{{ lang.get("settings_access_denied") }}{% endif %}"/></td>
             </tr>
             <tr>
                 <th scope="col">{{ lang.get("sensor_last_update") }}</th>
@@ -94,7 +94,7 @@
                 <th>{{ lang.get("sensor_field_actions") }}</th>
                 <td>
                     <input class="button smaller" type="submit" value="{{ lang.get("sensor_field_button_update") }}"/>
-                    <a class="show-warn-msg button warning smaller" href="/sensors/?action=remove_field&fid={{ field.fid }}">{{ lang.get("sensor_field_button_remove") }}</a>
+                    <a class="show-warn-msg button warning smaller" href="/settings/sensor/?sid={{ sensor.sid }}&action=remove_field&fid={{ field.fid }}">{{ lang.get("sensor_field_button_remove") }}</a>
                 </td>
             </tr>
         </table>

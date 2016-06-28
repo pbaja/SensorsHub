@@ -15,6 +15,7 @@ class WebRoot(object):
         """Gets template and kwargs passed as args, and returns rendered template"""
         kwargs["config"] = self.core.config
         kwargs["lang"] = self.core.lang
+        self.core.statistics.online()
         return self.env.get_template(template).render(**kwargs)
 
     @cherrypy.expose

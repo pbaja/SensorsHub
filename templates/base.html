@@ -37,6 +37,8 @@
             {% if msg %}<div class="message">{{msg}}</div>{% endif %}
             {% if success %}<div class="message success">{{success}}</div>{% endif %}
             {% if error %}<div class="message error">{{error}}</div>{% endif %}
+            {% if info %}<div class="message info">{{info}}</div>{% endif %}
+            {% if warning %}<div class="message warning">{{warning}}</div>{% endif %}
 			{% block content %}{% endblock %}
 		</div>
 	</body>

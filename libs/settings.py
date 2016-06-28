@@ -19,12 +19,20 @@ class WebSettings():
         if self.core.updater.update_available and template != "/settings/login.html":
             kwargs["info"] = self.core.lang.get("settings_update_available")
 
+        if self.core.config.get("demo_mode"):
+            kwargs["warning"] = self.core.lang.get("settings_demo_mode_enabled")
+
         return self.env.get_template(template).render(**kwargs)
 
     @cherrypy.expose
     def index(self, **kwargs):
         """Settings web page, available at /settings"""
-        account = self.core.accounts.protect()
+        account = self.core.accounts.verify_user()
+
+        if self.core.config.get("demo_mode") and not account:
+            return self.render("/settings/settings.html")
+        elif not account:
+            raise cherrypy.HTTPRedirect("/settings/login")
 
         if "update_account" in kwargs:
             if kwargs["password"] != kwargs["password_repeat"]:
@@ -51,6 +59,7 @@ class WebSettings():
             self.core.config.set("chart_point_radius", int(kwargs["chart_point_radius"]), False)
             self.core.config.set("chart_generate_average", kwargs["chart_generate_average"] == "1", False)
             self.core.config.set("chart_fill", kwargs["chart_fill"] == "1", False)
+            self.core.config.set("demo_mode", kwargs["demo_mode"] == "1", False)
             self.core.config.save()
             return self.render("/settings/settings.html", account=account, success=self.core.lang.get("success_settings_updated"))
 
@@ -78,16 +87,25 @@ class WebSettings():
     @cherrypy.expose
     def tools(self):
         """Tools web page, available at /settings/tools"""
-        self.core.accounts.protect()
+        if not self.core.config.get("demo_mode"):
+            self.core.accounts.protect()
 
         with sqlite3.connect("db.sqlite") as conn:
-
             database = {
                 "filesize": round(os.path.getsize("db.sqlite")/1024/1024,2),
                 "readings":  conn.execute("SELECT COUNT(*) FROM readings").fetchone()[0]
             }
 
-            return self.render("/settings/tools.html", database=database)
+            autoupdate = {
+                "version": self.core.VERSION,
+                "latest": self.core.updater.version["latest"],
+            }
+
+            statistics = {
+                "online": self.core.statistics.currently_online()
+            }
+
+            return self.render("/settings/tools.html", database=database, autoupdate=autoupdate, statistics=statistics)
 
     @cherrypy.expose
     def log(self, **kwargs):
@@ -126,9 +144,14 @@ class WebSettings():
     @cherrypy.expose
     def sensors(self, **kwargs):
         """Sensors web page, available at /settings/sensors"""
-        self.core.accounts.protect()
         active_sensors = self.core.sensors.get_all(status=SensorStatus.ACTIVE)
         inactive_sensors = self.core.sensors.get_all(status=SensorStatus.INACTIVE)
+
+        account = self.core.accounts.verify_user()
+        if self.core.config.get("demo_mode") and not account:
+            return self.render("/settings/sensors.html", active_sensors=active_sensors,inactive_sensors=inactive_sensors)
+        elif not account:
+            raise cherrypy.HTTPRedirect("/settings/login")
 
         if "action" in kwargs:
             if kwargs["action"] == "add":
@@ -149,32 +172,37 @@ class WebSettings():
     @cherrypy.expose
     def sensor(self, **kwargs):
         """Single sensor web page, available at /settings/sensor/SENSORID"""
-        self.core.accounts.protect()
         sensor = self.core.sensors.get_single(sid=int(kwargs["sid"]))
+
+        account = self.core.accounts.verify_user()
+        if self.core.config.get("demo_mode") and not account:
+            return self.render("/settings/sensor.html", sensor=sensor, account=account)
+        elif not account:
+            raise cherrypy.HTTPRedirect("/settings/login")
 
         if "action" in kwargs:
             if kwargs["action"] == "update_sensor":
                 sensor.title = kwargs["title"]
                 sensor.description = kwargs["description"]
                 sensor.commit()
-                return self.render("/settings/sensor.html", sensor=sensor, success=self.core.lang.get("success_sensor_updated"))
+                return self.render("/settings/sensor.html", sensor=sensor, account=account, success=self.core.lang.get("success_sensor_updated"))
             elif kwargs["action"] == "regen":
                 sensor.set_token()
                 sensor.commit()
-                return self.render("/settings/sensor.html", sensor=sensor, success=self.core.lang.get("success_sensor_token_regenerated"))
+                return self.render("/settings/sensor.html", sensor=sensor, account=account, success=self.core.lang.get("success_sensor_token_regenerated"))
             elif kwargs["action"] == "remove":
                 if self.core.sensors.remove(sensor.sid):
-                    return self.render("/settings/sensors.html", sensors = self.core.sensors.sensors, success=self.core.lang.get("success_sensor_removed"))
+                    return self.render("/settings/sensors.html", sensors = self.core.sensors.sensors, account=account, success=self.core.lang.get("success_sensor_removed"))
                 else:
-                    return self.render("/settings/sensors.html", sensors = self.core.sensors.sensors, error=self.core.lang.get("error_sensor_remove_failed"))
+                    return self.render("/settings/sensors.html", sensors = self.core.sensors.sensors, account=account, error=self.core.lang.get("error_sensor_remove_failed"))
             elif kwargs["action"] == "enable":
                 sensor.status = SensorStatus.ACTIVE
                 sensor.commit()
-                return self.render("/settings/sensor.html", sensor=sensor, success=self.core.lang.get("success_sensor_enabled"))
+                return self.render("/settings/sensor.html", sensor=sensor, account=account, success=self.core.lang.get("success_sensor_enabled"))
             elif kwargs["action"] == "disable":
                 sensor.status = SensorStatus.INACTIVE
                 sensor.commit()
-                return self.render("/settings/sensor.html", sensor=sensor, success=self.core.lang.get("success_sensor_disabled"))
+                return self.render("/settings/sensor.html", sensor=sensor, account=account, success=self.core.lang.get("success_sensor_disabled"))
             elif kwargs["action"] == "update_field":
                 field = Field.get(fid=int(kwargs["fid"]))[0]
                 field.display_name = kwargs["display_name"]
@@ -182,12 +210,12 @@ class WebSettings():
                 field.icon = kwargs["icon"]
                 field.color = kwargs["color"]
                 field.commit()
-                return self.render("/settings/sensor.html", sensor=sensor, success=self.core.lang.get("success_field_updated"))
+                return self.render("/settings/sensor.html", sensor=sensor, account=account, success=self.core.lang.get("success_field_updated"))
             elif kwargs["action"] == "remove_field":
                 if Field.remove(int(kwargs["fid"])):
-                    return self.render("/settings/sensor.html", sensor=sensor, success=self.core.lang.get("success_field_removed"))
+                    return self.render("/settings/sensor.html", sensor=sensor, account=account, success=self.core.lang.get("success_field_removed"))
                 else:
-                    return self.render("/settings/sensor.html", sensor=sensor, error=self.core.lang.get("error_field_remove_failed"))
+                    return self.render("/settings/sensor.html", sensor=sensor, account=account, error=self.core.lang.get("error_field_remove_failed"))
 
 
-        return self.render("/settings/sensor.html", sensor=sensor)
+        return self.render("/settings/sensor.html", sensor=sensor, account=account)

@@ -97,6 +97,8 @@
     "settings_description": "Opis",
     "settings_button_create_sensor": "Utwórz czujnik",
 
+    "settings_update_available": "Nowa wersja jest dostępna! Aby rozpocząć aktualizację, uruchom sensorshub z opcją --update",
+
     "sensor_settings": "Ustawienia czujnika",
     "sensor_sensor_id": "ID czujnika",
     "sensor_token": "Token",

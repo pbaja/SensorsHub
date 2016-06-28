@@ -1,8 +1,7 @@
 ![SensorsHub](http://i.imgur.com/tBlr8TD.png)  
 # SensorsHub  
-**Current version: ALPHA 0.01**  
-**Changelog: Not Yet Available**  
 **Documentation: [Wiki page](https://github.com/SkewPL/SensorsHub/wiki)**  
+**Changelog: [Here](https://github.com/SkewPL/SensorsHub/blob/master/changelog.md)**  
 **Live demo: [Here](http://sensors.skew.tk)**
   
 ## Features  

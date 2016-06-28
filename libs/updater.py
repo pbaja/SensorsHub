@@ -1,4 +1,4 @@
-import json, logging, zipfile, os, shutil, psutil, sys
+import json, logging, zipfile, os, shutil, psutil, sys, stat
 import urllib.request
 import distutils.dir_util
 
@@ -10,6 +10,13 @@ class Updater(object):
         self.core = core
         self.version = {}
         self.update_available = False
+
+    def __chmod_x(self, f):
+        try:
+            st = os.stat(f)
+            os.chmod(f, st.st_mode | stat.S_IEXEC)
+        except:
+            pass
 
     def check_updates(self):
         """Check if new version is available"""
@@ -50,6 +57,9 @@ class Updater(object):
                 logging.info("Removing update dir...")
                 shutil.rmtree("update")
 
+                logging.info("Configuring permissions...")
+                self.__chmod_x("run.py")
+                self.__chmod_x("run.sh")
 
                 logging.info("Closing connections and restartnig script.")
                 try:

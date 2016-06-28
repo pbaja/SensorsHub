@@ -10,4 +10,17 @@
         <tr><td>Total readings</td><td>{{ database.readings }}</td></tr>
     </table>
 </section>
+<section>
+    <h2>Auto update</h2>
+    <table>
+        <tr><td>Current version</td><td>v{{ autoupdate.version }}</td></tr>
+        <tr><td>Latest version</td><td>v{{ autoupdate.latest }}</td></tr>
+    </table>
+</section>
+<section>
+    <h2>Statistics</h2>
+    <table>
+        <tr><td>Currently online users</td><td>{{ statistics.online }}</td></tr>
+    </table>
+</section>
 {% endblock%}

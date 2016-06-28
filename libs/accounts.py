@@ -104,22 +104,23 @@ class Accounts(object):
             return account
         return None
 
-    def logout_user(self, account=None):
+    def logout_user(self):
         """Logs out user, including destroying cookies and removing user from loaded accounts"""
         # Reset session key
         cherrypy.response.cookie["session"] = ""
         cherrypy.response.cookie["session"]["path"] = "/"
         cherrypy.response.cookie["session"]["max-age"] = 0
-        # Remove user from list
-        account = self.verify_user()
-        if account is not None:
-            account.session = ""
-            account.commit()
-            self.accounts.remove(account)
-            logging.info("User {} ({}) logged out".format(account.user, self.core.get_client_ip()))
-            return True
-        else:
-            return False
+        # Remove user from list, if user cookie exist
+        user = cherrypy.request.cookie.get("user")
+        if user:
+            account = self.get_user(user.value)
+            if account is not None:
+                account.session = ""
+                account.commit()
+                self.accounts.remove(account)
+                logging.info("User {} ({}) logged out".format(account.user, self.core.get_client_ip()))
+                return True
+        return False
 
     def protect(self):
         """Use this function, when you want users to log in before accessing page"""
@@ -129,7 +130,7 @@ class Accounts(object):
         return account
 
     def verify_user(self):
-        """Check user session, first search for cookies, and then chceck if they contains valid information, returns Account when succeed, None otherwise"""
+        """Check user session. First search for cookies, and then chceck if they care containing valid information. returns Account when succeed, None otherwise"""
         user = cherrypy.request.cookie.get("user")
         session = cherrypy.request.cookie.get("session")
         # Check if cookies exist
