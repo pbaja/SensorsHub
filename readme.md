@@ -21,6 +21,8 @@
 If you want to change default server port from 80 to anything else, edit `config.json` and restart service using:  
 `sudo systemctl restart sensorshub.service`
   
+If you want to change directory/rename it after installation, just rerun install.sh to update service.  
+  
 ## Screenshots  
 #### Home page  
 ![Home page](http://i.imgur.com/gNqCmVM.png)  
@@ -32,18 +34,29 @@ If you want to change default server port from 80 to anything else, edit `config
 ![Sensors list](http://i.imgur.com/4HsapW4.png)
   
 ## TODO  
+(h) - High priority, currently working on that  
+(m) - Medium priority  
+(l) - Low priority  
+(f) - Future function, we need to implement some others first  
+  
+ - [ ] (h) PIN protected home page  
+ - [ ] (h) Better auto update function from website
+ - [ ] (m) Basic triggers (for e.g. Send email when temperature is greater than x)
+ - [ ] (m) Multiple field types: bool, int, float, percent  
+ - [ ] (m) Sending data to sensors (via sockets or ajax)  
+ - [ ] (m) Multiple accounts with permissions  
+ - [ ] (m) Language selection for guests
+ - [ ] (l) Better and more documentation
+ - [ ] (l) Allow guests to change theme to dark/light  
+ - [ ] (l) Comparing data for multiple periods from multiple fields  
+ - [ ] (l) More API functions for developers (Getting data from database, modifying)  
+ - [ ] (f) Advanced Triggers (for e.g. close window, when temperature inside is lower than outside)
+ - [ ] (f) Plugins system
  - [x] Multiple languages support
  - [x] Update home page field values with javascript  
  - [x] Make pairing with sensors more easly
- - [ ] Allow guests to change theme to dark/light  
  - [x] Better Sensors page, more readable  
  - [x] Create Log page, well, implement logging first.  
  - [x] Create About page  
- - [ ] Multiple accounts with permissions  
  - [x] Allow sensors to send Field descriptions and display names when creating them  
- - [ ] Sending data TO sensors (a.k.a. switches)  
- - [ ] Triggers (for e.g. close window, when temperature inside is lower than outside)
- - [ ] Multiple field types: bool, int, float, percent  
- - [ ] Comparing data for multiple periods from multiple fields  
- - [ ] More API functions for developers (Getting data from database, modifying)  
  - [x] Auto update
