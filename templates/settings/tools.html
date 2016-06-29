@@ -27,7 +27,7 @@
             $("#update_progress").show();
 
             $("#update_progress div").html("<i class='fa fa-cog fa-spin fa-3x fa-fw'></i><br>Starting update process. Please wait.<br>");
-            $.getJSON("/tools?action=autoupdate");
+            $.getJSON("/settings/tools?action=autoupdate");
             update_progress();
         }
 
@@ -35,27 +35,43 @@
             $.getJSON("/api/action,status", function(data) {
                 if(data["updater_status"] != updater_status) {
                     if(data["updater_status"] > 1 && updater_status <= 1) {
-                        $("#update_progress div").append("[2/7] Downloading zip...");
+                        $("#update_progress div").append("[2/7] Downloading zip...<br>");
                     }
                     if(data["updater_status"] > 2 && updater_status <= 2) {
-                        $("#update_progress div").append("[3/7] Extracting...");
+                        $("#update_progress div").append("[3/7] Extracting...<br>");
                     }
                     if(data["updater_status"] > 3 && updater_status <= 3) {
-                        $("#update_progress div").append("[4/7] Replacing files...");
+                        $("#update_progress div").append("[4/7] Replacing files...<br>");
                     }
                     if(data["updater_status"] > 4 && updater_status <= 4) {
-                        $("#update_progress div").append("[5/7] Removing update dir...");
+                        $("#update_progress div").append("[5/7] Removing update dir...<br>");
                     }
                     if(data["updater_status"] > 5 && updater_status <= 5) {
-                        $("#update_progress div").append("[6/7] Configuring permissions...");
+                        $("#update_progress div").append("[6/7] Configuring permissions...<br>");
                     }
                     if(data["updater_status"] > 6 && updater_status <= 6) {
-                        $("#update_progress div").append("[7/7] Closing connections and restartnig.");
+                        $("#update_progress div").append("[7/7] Closing connections and restartnig.<br>");
+                        setTimeout(update_wait,2500);
                     }
-                    updater_status = data["updater_status"]
+                    updater_status = data["updater_status"];
                 }
             }).complete(function(){
-                setTimeout(update_progress,500);
+                setTimeout(update_progress,250);
+            });
+        }
+
+        function update_wait() {
+            $.ajax("/api/action,status", {
+                type: "HEAD",
+                timeout: 1000,
+                complete:function(xhr, tstatus) {
+                    if(xhr.status == 200) {
+                        $("#update_progress div").append("<strong>Updated successfully! You can refresh page now :)</strong>");
+                    } else {
+                        $("#update_progress div").append("Waiting for Sensorshub to start...<br>");
+                        setTimeout(update_wait, 1000);
+                    }
+                }
             });
         }
     </script>

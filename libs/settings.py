@@ -87,8 +87,7 @@ class WebSettings():
     @cherrypy.expose
     def tools(self, **kwargs):
         """Tools web page, available at /settings/tools"""
-        if not self.core.config.get("demo_mode"):
-            self.core.accounts.protect()
+        self.core.accounts.protect()
 
         if "action" in kwargs:
             if kwargs["action"] == "autoupdate":

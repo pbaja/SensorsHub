@@ -17,7 +17,7 @@ from libs.statistics import Statistics
 
 class Core(object):
 
-    VERSION = 0.05
+    VERSION = 0.04
 
     def __init__(self):
         # Configure logger
