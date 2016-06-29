@@ -1,3 +1,8 @@
+**0.05 Beta**
+ - Script for automatic installation
+ - Fix message font color
+ - Added autoupdating with web interface (Alpha, untested!)
+
 **0.04 Beta**
  - Fixed recursion bug while logging in
  - Improved auto update algorithm

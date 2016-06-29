@@ -1,4 +1,4 @@
-import json, logging, zipfile, os, shutil, psutil, sys, stat
+import json, logging, zipfile, os, shutil, psutil, sys, stat, time
 import urllib.request
 import distutils.dir_util
 
@@ -10,6 +10,7 @@ class Updater(object):
         self.core = core
         self.version = {}
         self.update_available = False
+        self.status = 0
 
     def __chmod_x(self, f):
         try:
@@ -42,26 +43,33 @@ class Updater(object):
                 filename = url.split("/")[-1]
 
                 logging.info("Downloading zip...")
+                self.status = 2
                 if not os.path.exists("update"):
                     os.mkdir("update")
                 urllib.request.urlretrieve(url, "update/"+filename)
 
                 logging.info("Extracting...")
+                self.status = 3
                 zip = zipfile.ZipFile("update/"+filename)
                 zip.extractall("update")
 
                 logging.info("Replacing files...")
+                self.status = 4
                 directory = next(os.walk('update'))[1][0]
                 distutils.dir_util.copy_tree("update/"+directory, ".")
 
                 logging.info("Removing update dir...")
+                self.status = 5
                 shutil.rmtree("update")
 
                 logging.info("Configuring permissions...")
+                self.status = 6
                 self.__chmod_x("run.py")
                 self.__chmod_x("run.sh")
 
-                logging.info("Closing connections and restartnig script.")
+                logging.info("Closing connections and restartnig script in 3 seconds")
+                self.status = 7
+                time.sleep(3)
                 try:
                     p = psutil.Process(os.getpid())
                     for handler in p.open_files() + p.connections():
@@ -74,6 +82,7 @@ class Updater(object):
                 sys.exit(0)
 
             except Exception as e:
+                self.status = -1
                 logging.error("Failed to update. Exception: {}".format(e))
         else:
             logging.warning("Current version is latest, not updating")

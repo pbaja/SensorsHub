@@ -85,10 +85,15 @@ class WebSettings():
             return self.render("home.html", error=self.core.lang.get("error_logout_failed"))
 
     @cherrypy.expose
-    def tools(self):
+    def tools(self, **kwargs):
         """Tools web page, available at /settings/tools"""
         if not self.core.config.get("demo_mode"):
             self.core.accounts.protect()
+
+        if "action" in kwargs:
+            if kwargs["action"] == "autoupdate":
+                self.core.updater.update()
+                return ""
 
         with sqlite3.connect("db.sqlite") as conn:
             database = {

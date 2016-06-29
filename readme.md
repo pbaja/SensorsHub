@@ -14,12 +14,12 @@
  - Very simple API, super user and developer friendly
   
 ## Installation  
- - Install dependencies: `sudo apt-get install python3 python3-pip git-core`
- - Install requirements: `sudo pip3 install cherrypy passlib markdown2`
- - Download code: `git clone https://github.com/SkewPL/SensorsHub.git`
- - Add executable flag `cd SensorsHub && chmod +x run.py`
- - Run using `./run.py` or `python3 run.py`
- - Go to the `http://yourip` and configure everything.  
+ - Download code: `wget https://github.com/SkewPL/SensorsHub/archive/master.zip`
+ - Unzip and cd: `unzip master.zip && cd SensorsHub-master`
+ - Run installer: `chmod +x install.sh && sudo ./install.sh`
+
+If you want to change default server port from 80 to anything else, edit `config.json` and restart service using:  
+`sudo systemctl restart sensorshub.service`
   
 ## Screenshots  
 #### Home page  
@@ -27,7 +27,7 @@
 #### Single sensor view  
 ![Single sensor](http://i.imgur.com/UQIUI1u.png)  
 #### Settings home page  
-![Settings page](http://i.imgur.com/sahXFFh.png)  
+![Settings page](http://i.imgur.com/sahXFFh.png)  ``
 #### Sensors list  
 ![Sensors list](http://i.imgur.com/4HsapW4.png)
   

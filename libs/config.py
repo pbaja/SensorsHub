@@ -40,7 +40,7 @@ class Config(object):
     def save(self):
         """Saves data back to file"""
         with open("config.json", "w") as file:
-            json.dump(self.config, file)
+            json.dump(self.config, file, indent=4)
             logging.info("Saved config to config.json")
             return True
 

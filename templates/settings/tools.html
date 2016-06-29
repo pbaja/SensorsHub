@@ -16,6 +16,60 @@
         <tr><td>Current version</td><td>v{{ autoupdate.version }}</td></tr>
         <tr><td>Latest version</td><td>v{{ autoupdate.latest }}</td></tr>
     </table>
+    {% if autoupdate.version < autoupdate.latest %}
+        <a href="#" class="button" onclick="$('#update_confirm').show()">Update now</a>
+    {% endif %}
+    <script>
+        var updater_status = 0;
+
+        function begin_update() {
+            $("#update_confirm").hide();
+            $("#update_progress").show();
+
+            $("#update_progress div").html("<i class='fa fa-cog fa-spin fa-3x fa-fw'></i><br>Starting update process. Please wait.<br>");
+            $.getJSON("/tools?action=autoupdate");
+            update_progress();
+        }
+
+        function update_progress() {
+            $.getJSON("/api/action,status", function(data) {
+                if(data["updater_status"] != updater_status) {
+                    if(data["updater_status"] > 1 && updater_status <= 1) {
+                        $("#update_progress div").append("[2/7] Downloading zip...");
+                    }
+                    if(data["updater_status"] > 2 && updater_status <= 2) {
+                        $("#update_progress div").append("[3/7] Extracting...");
+                    }
+                    if(data["updater_status"] > 3 && updater_status <= 3) {
+                        $("#update_progress div").append("[4/7] Replacing files...");
+                    }
+                    if(data["updater_status"] > 4 && updater_status <= 4) {
+                        $("#update_progress div").append("[5/7] Removing update dir...");
+                    }
+                    if(data["updater_status"] > 5 && updater_status <= 5) {
+                        $("#update_progress div").append("[6/7] Configuring permissions...");
+                    }
+                    if(data["updater_status"] > 6 && updater_status <= 6) {
+                        $("#update_progress div").append("[7/7] Closing connections and restartnig.");
+                    }
+                    updater_status = data["updater_status"]
+                }
+            }).complete(function(){
+                setTimeout(update_progress,500);
+            });
+        }
+    </script>
+    <div class="popup" id="update_confirm" style="display: none">
+    <div>
+        Do you really want to perform update using website?<br><br>
+        If something goes wrong, you will loose access to it and access to the terminal and knowledge will be needed!<br>
+        <a href="#" class="button" onclick="$('#update_confirm').hide()">No, cancel</a>
+        <a href="#" class="button error" onclick="begin_update()">Yes, i understand consequences</a>
+    </div>
+    </div>
+    <div class="popup" id="update_progress" style="display: none">
+        <div></div>
+    </div>
 </section>
 <section>
     <h2>Statistics</h2>

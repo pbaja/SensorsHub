@@ -219,3 +219,10 @@ class WebRoot(object):
                     fields[fid] = reading.value
 
             return json.dumps({"code": 30, "fields": fields})
+
+        # Get website status
+        elif args["action"] == "status":
+            return json.dumps({
+                "updater_status": self.core.updater.status,
+                "version": self.core.VERSION
+            })
