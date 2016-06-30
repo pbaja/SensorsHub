@@ -91,10 +91,11 @@ rm "version.json" 2> /dev/null
 
 # Just for statistics, generate unique machine id and send it to server
 # There is no sensitive data at all :)
-PROCESSOR_ID=$(sudo dmidecode -t 4 | grep ID | sed 's/.*ID://;s/ //g')
+PROCESSOR_ID=$(dmidecode -t 4 | grep ID | sed 's/.*ID://;s/ //g')
 NETWORK_MAC=$(ifconfig | grep eth0 | awk '{print $NF}' | sed 's/://g')
-MACHINEID=$PROCESSOR_ID$NETWORK_MAC | sha256sum | awk '{print $1}' > /dev/null
+MACHINEID=$(echo $PROCESSOR_ID$NETWORK_MAC | sha256sum | awk '{print $1}')
 
+echo "$MACHINEID" > "machineid.txt"
 wget "http://skew.tk/sensorshub?machineid="$MACHINEID"&status=0" -O /dev/null &>/dev/null
 
 # Done!

@@ -101,9 +101,10 @@
     "settings_description": "Description",
     "settings_button_create_sensor": "Create sensor",
 
-    "settings_update_available": "New update is available! To begin autoupdate, start sensorshub with --update option",
+    "settings_update_available": "New update is available! Go to the Settings -> Tools for more information",
     "settings_demo_mode_enabled": "Demo mode enabled! Normally it should be disabled, check settings",
-    "settings_access_denied": "You are not authorized to see this content",
+    "settings_cannot_do_that": "You are not authorized to do this",
+    "settings_cannot_see_that": "You are not authorized to see this",
 
     "sensor_settings": "Sensor settings",
     "sensor_sensor_id": "Sensor ID",
@@ -120,6 +121,8 @@
     "sensor_field": "Sensor field",
     "sensor_field_id": "Field ID",
     "sensor_field_name": "Name",
+    "sensor_field_type": "Type",
+    "sensor_field_parent": "Parent",
     "sensor_field_display_name": "Display name",
     "sensor_field_unit": "Unit",
     "sensor_field_icon": "Icon",
@@ -127,6 +130,11 @@
     "sensor_field_actions": "Actions",
     "sensor_field_button_update": "Update field",
     "sensor_field_button_remove": "Remove field",
+
+    "sensor_field_type_float": "Float",
+    "sensor_field_type_bool": "Boolean",
+    "sensor_field_type_integer": "Integer",
+    "sensor_field_type_percent": "Percentage",
 
     "error_passwords_not_match": "Passwords does not match",
     "success_account_updated": "Account updated",

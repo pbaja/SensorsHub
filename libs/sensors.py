@@ -69,12 +69,7 @@ class Sensor(object):
 
     def get_fields(self):
         """Returns list of fields without readings"""
-        with sqlite3.connect("db.sqlite") as conn:
-            results = conn.execute("SELECT sid, fid, name, unit, display_name, style, updated FROM fields WHERE sid=?",[self.sid]).fetchall()
-            fields = []
-            for result in results:
-                fields.append(Field(result[0],result[1],result[2],result[3],result[4], result[5], result[6]))
-            return fields
+        return Field.get(sid=self.sid)
 
     def get_readings(self, delta=0, group_minutes="1S"):
         """Returns list of fields with readings"""

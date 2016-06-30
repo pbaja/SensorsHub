@@ -17,7 +17,7 @@ from libs.statistics import Statistics
 
 class Core(object):
 
-    VERSION = 0.05
+    VERSION = 0.06
 
     def __init__(self):
         # Configure logger
@@ -50,34 +50,30 @@ class Core(object):
             #
             # SENSORS
             # Table for sensors, each sensor has one row.
-            #
-            # sid - Sensor ID, must be unique
-            # token - Generated string for authentication
-            # title - Title of the sensor, f.eg. Outside
-            # description - Description of the sensor, f.eg. ESP8266 temperature sensor
-            # updated - Timestamp updated when new reading is received
             conn.execute(
                 "CREATE TABLE IF NOT EXISTS sensors("
-                "sid INTEGER PRIMARY KEY AUTOINCREMENT, "
-                "token TEXT, "
-                "title TEXT, "
-                "description TEXT, "
-                "updated INTEGER, "
-                "status INTEGER DEFAULT 0"
+                "sid INTEGER PRIMARY KEY AUTOINCREMENT, " # Sensor ID, must be unique
+                "token TEXT, " # Generated string for authentication
+                "title TEXT, " # Title of the sensor, f.eg. Outside
+                "description TEXT, " # Description of the sensor, f.eg. ESP8266 temperature sensor
+                "updated INTEGER, " # Timestamp updated when new reading is received
+                "status INTEGER DEFAULT 0" # Current status (enabled, disabled)
                 ")")
 
             # FIELDS
-            # Table for fields, each sensor can have multiple fields
-            #
-            # fid - Field ID, must be unique
-            # sid - Sensor ID to which this field belong
-            # name - Name of the field, f.eg. temperature
-            # display_name - Human friendly name of the field, f.eg. Temperature
-            # style - Icon (Font awesome name) and color (HEX) of the field, f.eg. bed#F0A
-            # unit - Unit of the field, f.eg. &deg;C
             conn.execute(
-                "CREATE TABLE IF NOT EXISTS fields"
-                "(fid INTEGER PRIMARY KEY AUTOINCREMENT, sid INTEGER, updated INTEGER, value FLOAT, name TEXT, display_name TEXT, style TEXT, unit TEXT)")
+                "CREATE TABLE IF NOT EXISTS fields("
+                "fid INTEGER PRIMARY KEY AUTOINCREMENT, " # Field ID, must be unique
+                "sid INTEGER, " # Sensor ID to which this field belong
+                "parent INTEGER" # Parent fid, default None
+                "type INTEGER" # Field type
+                "updated INTEGER, " # Updated time in timestamp format
+                "value FLOAT, " # Current field value
+                "name TEXT, " # Name of the field, f.eg. temperature
+                "display_name TEXT, " # Human friendly name of the field, f.eg. Temperature
+                "color TEXT, " # Color (HEX) of the field without hashtag, f.eg. FF00AA
+                "icon TEXT" # Font awesome icon f.eg. fa-sun-o
+                "unit TEXT)") # Unit of the field, f.eg. &deg;C
 
             #
             # READINGS
@@ -176,6 +172,7 @@ class Core(object):
         cherrypy.engine.start()
 
         logging.info("Done loading")
+        Statistics.snooper(1)
         cherrypy.engine.block()
 
     def get_client_ip(self):

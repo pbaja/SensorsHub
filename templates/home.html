@@ -107,7 +107,7 @@
     <div class="sensor-container">
         {% for sensor in sensors %}
             {% for field in sensor.get_latest() %}
-                <div class="sensor-section" data-fid="{{ field.fid }}" {% if config.get("colorize_field_tile") %} style="background-color: {{ field.color }}"{% endif %}>
+                <div class="sensor-section" data-fid="{{ field.fid }}" {% if config.get("colorize_field_tile") %}{% endif %}>
                     {% if field.icon != "None" %}
                     <div class="sensor-left"><i class="fa fa-2x {{ field.icon }}"></i></div>
                     {% endif %}

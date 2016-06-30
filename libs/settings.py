@@ -1,7 +1,7 @@
 import cherrypy, os, sqlite3, markdown2
 
 from libs.accounts import Account
-from libs.fields import Field
+from libs.fields import Field, FieldType
 from libs.sensors import SensorStatus
 
 class WebSettings():
@@ -27,49 +27,47 @@ class WebSettings():
     @cherrypy.expose
     def index(self, **kwargs):
         """Settings web page, available at /settings"""
-        account = self.core.accounts.verify_user()
+        user = self.core.accounts.protect(bypass_in_demo_mode=True)
 
-        if self.core.config.get("demo_mode") and not account:
-            return self.render("/settings/settings.html")
-        elif not account:
-            raise cherrypy.HTTPRedirect("/settings/login")
+        if "action" in kwargs:
+            if user is None:
+                return self.render("/settings/settings.html", account=user, error=self.core.lang.get("settings_cannot_do_that"))
 
-        if "update_account" in kwargs:
-            if kwargs["password"] != kwargs["password_repeat"]:
-                self.render("/settings/settings.html", account=account, error=self.core.lang.get("error_passwords_not_match"))
-            if kwargs["password"] != "": account.password = Account.hash_password(kwargs["password"])
-            account.email = kwargs["email"]
-            account.commit()
-            self.core.accounts.logout_user(account)
-            return self.render("/settings/settings.html", account=account, success=self.core.lang.get("success_account_updated"))
+            if kwargs["action"] == "update_account":
+                if kwargs["password"] != kwargs["password_repeat"]:
+                    self.render("/settings/settings.html", account=user, error=self.core.lang.get("error_passwords_not_match"))
+                if kwargs["password"] != "": user.password = Account.hash_password(kwargs["password"])
+                user.email = kwargs["email"]
+                user.commit()
+                self.core.accounts.logout_user(user)
+                return self.render("/settings/settings.html", account=user, success=self.core.lang.get("success_account_updated"))
+            elif kwargs["action"] == "update_config":
+                self.core.config.set("colorize_field_tile", kwargs["colorize_field_tile"] == "1", False)
+                self.core.config.set("dark_theme", kwargs["dark_theme"] == "1", False)
+                self.core.config.set("port", int(kwargs["port"]), False)
+                self.core.config.set("host", kwargs["host"], False)
+                self.core.config.set("page_title", kwargs["page_title"], False)
+                self.core.config.set("show_update_time", kwargs["show_update_time"] == "1", True)
+                self.core.config.set("about_page", kwargs["about_page"], False)
+                self.core.config.set("language", kwargs["language"], False)
+                self.core.config.set("chart_point_radius", int(kwargs["chart_point_radius"]), False)
+                self.core.config.set("chart_generate_average", kwargs["chart_generate_average"] == "1", False)
+                self.core.config.set("chart_fill", kwargs["chart_fill"] == "1", False)
+                self.core.config.set("demo_mode", kwargs["demo_mode"] == "1", False)
+                self.core.config.save()
+                return self.render("/settings/settings.html", account=user,
+                                   success=self.core.lang.get("success_settings_updated"))
+            elif kwargs["action"] == "reload_lang":
+                self.core.lang.load()
+                return self.render("/settings/settings.html", account=user, success=self.core.lang.get("success_lang_files_reloaded"))
 
-        if "reload_lang" in kwargs:
-            self.core.lang.load()
-            return self.render("/settings/settings.html", account=account, success=self.core.lang.get("success_lang_files_reloaded"))
-
-        elif "update_config" in kwargs:
-            self.core.config.set("colorize_field_tile", kwargs["colorize_field_tile"] == "1", False)
-            self.core.config.set("dark_theme", kwargs["dark_theme"] == "1", False)
-            self.core.config.set("port", int(kwargs["port"]), False)
-            self.core.config.set("host", kwargs["host"], False)
-            self.core.config.set("page_title", kwargs["page_title"], False)
-            self.core.config.set("show_update_time", kwargs["show_update_time"] == "1", True)
-            self.core.config.set("about_page", kwargs["about_page"], False)
-            self.core.config.set("language", kwargs["language"], False)
-            self.core.config.set("chart_point_radius", int(kwargs["chart_point_radius"]), False)
-            self.core.config.set("chart_generate_average", kwargs["chart_generate_average"] == "1", False)
-            self.core.config.set("chart_fill", kwargs["chart_fill"] == "1", False)
-            self.core.config.set("demo_mode", kwargs["demo_mode"] == "1", False)
-            self.core.config.save()
-            return self.render("/settings/settings.html", account=account, success=self.core.lang.get("success_settings_updated"))
-
-        return self.render("/settings/settings.html", account=account)
+        return self.render("/settings/settings.html", account=user)
 
     @cherrypy.expose
     def login(self, **kwargs):
         """Login web page, available at /settings/login"""
         if "user" in kwargs and "pass" in kwargs:
-            if self.core.accounts.login_user(kwargs["user"], kwargs["pass"]):
+            if self.core.accounts.login_user(kwargs["user"], kwargs["pass"]) is not None:
                 raise cherrypy.HTTPRedirect("/settings")
             else:
                 return self.render("/settings/login.html", error=self.core.lang.get("error_wrong_username_or_password"))
@@ -80,9 +78,9 @@ class WebSettings():
     def logout(self):
         """Logout web page, available at /settings/logout"""
         if self.core.accounts.logout_user():
-            return self.render("home.html", success=self.core.lang.get("success_logged_out"))
+            return self.render("/settings/login.html", success=self.core.lang.get("success_logged_out"))
         else:
-            return self.render("home.html", error=self.core.lang.get("error_logout_failed"))
+            return self.render("/settings/login.html", error=self.core.lang.get("error_logout_failed"))
 
     @cherrypy.expose
     def tools(self, **kwargs):
@@ -150,14 +148,12 @@ class WebSettings():
         """Sensors web page, available at /settings/sensors"""
         active_sensors = self.core.sensors.get_all(status=SensorStatus.ACTIVE)
         inactive_sensors = self.core.sensors.get_all(status=SensorStatus.INACTIVE)
-
-        account = self.core.accounts.verify_user()
-        if self.core.config.get("demo_mode") and not account:
-            return self.render("/settings/sensors.html", active_sensors=active_sensors,inactive_sensors=inactive_sensors)
-        elif not account:
-            raise cherrypy.HTTPRedirect("/settings/login")
+        user = self.core.accounts.protect(bypass_in_demo_mode=True)
 
         if "action" in kwargs:
+            if user is None:
+                return self.render("/settings/settings.html", account=user, error=self.core.lang.get("settings_cannot_do_that"))
+
             if kwargs["action"] == "add":
                 if self.core.sensors.add(title=kwargs["title"], description=kwargs["description"]):
                     active_sensors = self.core.sensors.get_all(SensorStatus.ACTIVE)
@@ -177,49 +173,47 @@ class WebSettings():
     def sensor(self, **kwargs):
         """Single sensor web page, available at /settings/sensor/SENSORID"""
         sensor = self.core.sensors.get_single(sid=int(kwargs["sid"]))
-
-        account = self.core.accounts.verify_user()
-        if self.core.config.get("demo_mode") and not account:
-            return self.render("/settings/sensor.html", sensor=sensor, account=account)
-        elif not account:
-            raise cherrypy.HTTPRedirect("/settings/login")
+        user = self.core.accounts.protect(bypass_in_demo_mode=True)
 
         if "action" in kwargs:
+            if user is None:
+                return self.render("/settings/sensor.html",sensor=sensor, account=user, error=self.core.lang.get("settings_cannot_do_that"))
+
             if kwargs["action"] == "update_sensor":
                 sensor.title = kwargs["title"]
                 sensor.description = kwargs["description"]
                 sensor.commit()
-                return self.render("/settings/sensor.html", sensor=sensor, account=account, success=self.core.lang.get("success_sensor_updated"))
+                return self.render("/settings/sensor.html", sensor=sensor, account=user, success=self.core.lang.get("success_sensor_updated"))
             elif kwargs["action"] == "regen":
                 sensor.set_token()
                 sensor.commit()
-                return self.render("/settings/sensor.html", sensor=sensor, account=account, success=self.core.lang.get("success_sensor_token_regenerated"))
+                return self.render("/settings/sensor.html", sensor=sensor, account=user, success=self.core.lang.get("success_sensor_token_regenerated"))
             elif kwargs["action"] == "remove":
                 if self.core.sensors.remove(sensor.sid):
-                    return self.render("/settings/sensors.html", sensors = self.core.sensors.sensors, account=account, success=self.core.lang.get("success_sensor_removed"))
+                    return self.render("/settings/sensors.html", sensors = self.core.sensors.sensors, account=user, success=self.core.lang.get("success_sensor_removed"))
                 else:
-                    return self.render("/settings/sensors.html", sensors = self.core.sensors.sensors, account=account, error=self.core.lang.get("error_sensor_remove_failed"))
+                    return self.render("/settings/sensors.html", sensors = self.core.sensors.sensors, account=user, error=self.core.lang.get("error_sensor_remove_failed"))
             elif kwargs["action"] == "enable":
                 sensor.status = SensorStatus.ACTIVE
                 sensor.commit()
-                return self.render("/settings/sensor.html", sensor=sensor, account=account, success=self.core.lang.get("success_sensor_enabled"))
+                return self.render("/settings/sensor.html", sensor=sensor, account=user, success=self.core.lang.get("success_sensor_enabled"))
             elif kwargs["action"] == "disable":
                 sensor.status = SensorStatus.INACTIVE
                 sensor.commit()
-                return self.render("/settings/sensor.html", sensor=sensor, account=account, success=self.core.lang.get("success_sensor_disabled"))
+                return self.render("/settings/sensor.html", sensor=sensor, account=user, success=self.core.lang.get("success_sensor_disabled"))
             elif kwargs["action"] == "update_field":
                 field = Field.get(fid=int(kwargs["fid"]))[0]
                 field.display_name = kwargs["display_name"]
                 field.unit = kwargs["unit"]
                 field.icon = kwargs["icon"]
                 field.color = kwargs["color"]
+                field.fieldtype = FieldType(int(kwargs["fieldtype"]))
                 field.commit()
-                return self.render("/settings/sensor.html", sensor=sensor, account=account, success=self.core.lang.get("success_field_updated"))
+                return self.render("/settings/sensor.html", sensor=sensor, account=user, success=self.core.lang.get("success_field_updated"))
             elif kwargs["action"] == "remove_field":
                 if Field.remove(int(kwargs["fid"])):
-                    return self.render("/settings/sensor.html", sensor=sensor, account=account, success=self.core.lang.get("success_field_removed"))
+                    return self.render("/settings/sensor.html", sensor=sensor, account=user, success=self.core.lang.get("success_field_removed"))
                 else:
-                    return self.render("/settings/sensor.html", sensor=sensor, account=account, error=self.core.lang.get("error_field_remove_failed"))
+                    return self.render("/settings/sensor.html", sensor=sensor, account=user, error=self.core.lang.get("error_field_remove_failed"))
 
-
-        return self.render("/settings/sensor.html", sensor=sensor, account=account)
+        return self.render("/settings/sensor.html", sensor=sensor, account=user)

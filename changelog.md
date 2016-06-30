@@ -1,3 +1,10 @@
+**0.06 Beta**
+Warning! Databse scheme changed. You need to remove your old database file. (It's beta, you know.)
+ - Some account system improvements
+ - More messages/popups
+ - Added snooper
+ - Fixed updating fields
+
 **0.05 Beta**
  - Script for automatic installation
  - Fix message font color

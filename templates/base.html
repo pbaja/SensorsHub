@@ -34,11 +34,11 @@
             </ul>
         </header>
 		<div id="container">
-            {% if msg %}<div class="message">{{msg}}</div>{% endif %}
-            {% if success %}<div class="message success">{{success}}</div>{% endif %}
-            {% if error %}<div class="message error">{{error}}</div>{% endif %}
-            {% if info %}<div class="message info">{{info}}</div>{% endif %}
-            {% if warning %}<div class="message warning">{{warning}}</div>{% endif %}
+            {% if error %}<div class="message error"><i class="fa fa-exclamation-circle" aria-hidden="true"></i> {{error}}</div>{% endif %}
+            {% if warning %}<div class="message warning"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> {{warning}}</div>{% endif %}
+            {% if info %}<div class="message info"><i class="fa fa-info-circle" aria-hidden="true"></i> {{info}}</div>{% endif %}
+            {% if success %}<div class="message success"><i class="fa fa-check-circle" aria-hidden="true"></i> {{success}}</div>{% endif %}
+
 			{% block content %}{% endblock %}
 		</div>
 	</body>

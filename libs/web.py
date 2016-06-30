@@ -147,8 +147,14 @@ class WebRoot(object):
                 fields[name][key] = value
 
             sensor = self.core.sensors.add(title=args["title"],description=args["description"], status=SensorStatus.INACTIVE)
-            for name, field in fields.items():
-                Field.create(sensor.sid, name, **field)
+            for name, keys in fields.items():
+                field = Field.create(sensor.sid, name)
+
+                if "unit" in keys: field.unit = keys["unit"]
+                if "display_name" in keys: field.display_name = keys["display_name"]
+                if "icon" in keys: field.icon = keys["icon"]
+                if "parent" in keys: field.parent = int(keys["parent"])
+                if "type" in keys:  field.fieldtype = int(keys["type"])
 
             return json.dumps({"code": 20, "message": "Sensor registered. Now wait for user to enable it.", "sensorid": sensor.sid, "token": sensor.token})
 

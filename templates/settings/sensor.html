@@ -26,11 +26,11 @@
         <table>
             <tr>
                 <th scope="col">{{ lang.get("sensor_sensor_id") }}</th>
-                <td><input class="wide" type="text" disabled="1" value="{% if account %}{{ sensor.sid }}{% else %}{{ lang.get("settings_access_denied") }}{% endif %}"/></td>
+                <td><input class="wide" type="text" disabled="1" value="{% if account %}{{ sensor.sid }}{% else %}{{ lang.get("settings_cannot_see_that") }}{% endif %}"/></td>
             </tr>
             <tr>
                 <th scope="col">{{ lang.get("sensor_token") }}</th>
-                <td><input class="wide" type="text" disabled="1" value="{% if account %}{{ sensor.token }}{% else %}{{ lang.get("settings_access_denied") }}{% endif %}"/></td>
+                <td><input class="wide" type="text" disabled="1" value="{% if account %}{{ sensor.token }}{% else %}{{ lang.get("settings_cannot_see_that") }}{% endif %}"/></td>
             </tr>
             <tr>
                 <th scope="col">{{ lang.get("sensor_last_update") }}</th>
@@ -73,6 +73,17 @@
             <tr>
                 <th scope="col">{{ lang.get("sensor_field_name") }}</th>
                 <td><input class="wide" type="text" disabled="1" value="{{ field.name }}"/></td>
+            </tr>
+            <tr>
+                <th scope="col">{{ lang.get("sensor_field_type") }}</th>
+                <td>
+                    <select name="fieldtype" class="wide">
+                        <option value="0" {% if field.fieldtype == 0 %}selected{% endif %}>{{ lang.get("sensor_field_type_float") }}</option>
+                        <option value="1" {% if field.fieldtype == 1 %}selected{% endif %}>{{ lang.get("sensor_field_type_integer") }}</option>
+                        <option value="2" {% if field.fieldtype == 2 %}selected{% endif %}>{{ lang.get("sensor_field_type_bool") }}</option>
+                        <option value="3" {% if field.fieldtype == 3 %}selected{% endif %}>{{ lang.get("sensor_field_type_percent") }}</option>
+                    </select>
+                </td>
             </tr>
             <tr>
                 <th scope="col">{{ lang.get("sensor_field_display_name") }}</th>

@@ -36,10 +36,11 @@
                 <td><input class="wide" type="email" name="email" value="{{ account.email }}" /></td>
             </tr>
         </table>
-        <input class="button" type="submit" name="update_account" value="{{ lang.get("settings_button_update") }}" />
+        <input type="hidden" name="action" value="update_account" />
+        <input class="button" type="submit" value="{{ lang.get("settings_button_update") }}" />
     </form>
     {% else %}
-            <div class="setting-description">{{ lang.get("settings_access_denied") }}</div>
+            <div class="setting-description">{{ lang.get("settings_cannot_see_that") }}</div>
     {% endif %}
 </section>
 <section>
@@ -75,7 +76,7 @@
                             <option value="{{key}}" {% if key == config.get("language") %}selected{% endif %}>{{ val.name }} ({{ val.english_name }})</option>
                         {% endfor %}
                     </select><br>
-                    <a href="/settings/?reload_lang=1">{{ lang.get("settings_language_reload") }}</a>
+                    <a href="/settings/?action=reload_lang">{{ lang.get("settings_language_reload") }}</a>
                 </td>
             </tr>
             <tr>
@@ -174,7 +175,8 @@
                 </td>
             </tr>
         </table>
-        <input class="button" type="submit" name="update_config" value="{{ lang.get("settings_button_update") }}" />
+        <input type="hidden" name="action" value="update_config"/>
+        <input class="button" type="submit" value="{{ lang.get("settings_button_update") }}" />
     </form>
 </section>
 {% endblock%}

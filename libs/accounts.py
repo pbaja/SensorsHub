@@ -1,6 +1,5 @@
 from passlib.hash import pbkdf2_sha256
-from cherrypy._cpcompat import base64_decode
-import cherrypy, random, string, time, sqlite3, logging
+import cherrypy, random, string, time, sqlite3, logging, libs.statistics
 
 class Account():
     """Class containing one account"""
@@ -55,95 +54,135 @@ class Accounts(object):
                 else:
                     logging.error("Failed to create admin account!")
 
-    def get_user(self, user=None, uid=None):
+    def create_user(self, user, password, email=""):
+        """Creates new user based on supplied username, password, and/or email"""
+        with sqlite3.connect("db.sqlite") as conn:
+            # Hash password
+            hashed_pass = pbkdf2_sha256.encrypt(password)
+
+            result = conn.execute("INSERT INTO accounts (user, password, email) VALUES (?,?,?);",
+                                  [user, hashed_pass, email])
+            account = Account(result.lastrowid, user, hashed_pass, email)
+            self.accounts.append(account)
+            logging.info("Created user {}".format(user))
+            return account
+        return None
+
+    def current_user(self):
+        """Return Account for logged in user based on cookie, also verify session"""
+        user = cherrypy.request.cookie.get("user")
+        session = cherrypy.request.cookie.get("session")
+
+        # Check if cookies exist
+        if user is None or session is None: return None
+
+        # Check if user exists
+        user = self.get_user(user=user.value)
+        if user is None:
+            logging.warning("Cookie with user {} ({}) exists, but user is not in database".format(user.user,self.core.get_client_ip()))
+            return None
+
+        # Check if user session is valid
+        if user.session != session.value:
+            logging.warning("Cookie with user {} ({}) exists, but session cookie is invalid".format(user.user, self.core.get_client_ip()))
+            return None
+
+        # Everything ok, return user
+        return user
+
+    def protect(self, bypass_in_demo_mode=False):
+        """Returns user if he's logged in, otherwise redirects to login page"""
+
+        # Check current logged in user
+        user = self.current_user()
+
+        # If allowed, return None when demo mode
+        if user is not None or (bypass_in_demo_mode and self.core.config.get("demo_mode")):
+            return user
+
+        if user is None:
+            raise cherrypy.HTTPRedirect("/settings/login")
+
+    def get_user(self, user=None, uid=None, in_list=True, in_database=True):
         """Returns Account from loaded accounts, based on username or uid"""
-        for account in self.accounts:
-            if account.user == user or account.uid == uid:
-                return account
+
+        # If user is in account list, get him from there
+        if in_list:
+            for account in self.accounts:
+                if account.user == user or account.uid == uid: return account
+
+        # Otherwise download him from database
+        if in_database:
+            with sqlite3.connect("db.sqlite") as conn:
+                result = None
+                if user is not None:
+                    result = conn.execute("SELECT uid, password, email FROM accounts WHERE user=?;", [user]).fetchone()
+                elif uid is not None:
+                    result = conn.execute("SELECT uid, password, email FROM accounts WHERE user=?;", [user]).fetchone()
+                if result is not None:
+                    account = Account(result[0], user, result[1])
+                    account.email = result[2]
+                    self.accounts.append(account)
+                    return account
+
+        # Return None if not found
         return None
 
     def login_user(self, user, password):
         """Tries to login user using username and password, returns Account object when succeed, otherwise None"""
-        # Check if user exist
-        with sqlite3.connect("db.sqlite") as conn:
-            result = conn.execute("SELECT uid, password, email FROM accounts WHERE user=?;", [user]).fetchall()
-            if len(result) > 0:
-                result = result[0]
-                # Verify password
-                if pbkdf2_sha256.verify(password, result[1]):
-                    # Password okay, login
-                    account = Account(result[0],user, result[1])
-                    account.session = ''.join([random.choice(string.ascii_letters + string.digits) for n in range(32)])
-                    account.lastlogin = int(time.time())
-                    account.email = result[2]
-                    account.commit()
-                    self.accounts.append(account)
-                    # Create cookies
-                    cherrypy.response.cookie["user"] = account.user
-                    cherrypy.response.cookie["user"]["path"] = "/"
-                    cherrypy.response.cookie["user"]["max-age"] = 3600 * 6
-                    cherrypy.response.cookie["session"] = account.session
-                    cherrypy.response.cookie["session"]["path"] = "/"
-                    cherrypy.response.cookie["session"]["max-age"] = 3600 * 6
-                    logging.info("User {} ({}) logged in".format(user, self.core.get_client_ip()))
-                    return account
-                else:
-                    logging.warning("User {} supplied wrong password".format(user))
-            else:
-                logging.info("Someone tried to log in with username {}, but cannot find that user in database".format(user))
-        return None
+        # Get user
+        user = self.get_user(user=user)
 
-    def create_user(self, user, password, email=""):
-        """Created new user based on supplied username, password, and/or email"""
-        with sqlite3.connect("db.sqlite") as conn:
-            hashed_pass = pbkdf2_sha256.encrypt(password)
-            cur = conn.cursor()
-            cur.execute("INSERT INTO accounts (user, password, email) VALUES (?,?,?);", [user, hashed_pass, email])
-            account = Account(cur.lastrowid,user,hashed_pass, email)
-            self.accounts.append(account)
-            return account
-        return None
+        # Check if user exists
+        if user is None:
+            logging.info("Someone tried to log in with username {}, but cannot find that user in database".format(user.user))
+            return None
+
+        # Check user password
+        if not pbkdf2_sha256.verify(password, user.password):
+            logging.warning("User {} supplied wrong password".format(user.user))
+            return None
+
+        # Everything ok
+        # Update session key and lastlogin value in database
+        user.session = ''.join([random.choice(string.ascii_letters + string.digits) for n in range(32)])
+        user.lastlogin = int(time.time())
+        user.commit()
+
+        # Create cookies
+        cherrypy.response.cookie["user"] = user.user
+        cherrypy.response.cookie["user"]["path"] = "/"
+        cherrypy.response.cookie["user"]["max-age"] = 3600 * 6
+        cherrypy.response.cookie["session"] = user.session
+        cherrypy.response.cookie["session"]["path"] = "/"
+        cherrypy.response.cookie["session"]["max-age"] = 3600 * 6
+        logging.info("User {} ({}) logged in".format(user.user, self.core.get_client_ip()))
+
+        # Return user account
+        libs.statistics.Statistics.snooper(2)
+        return user
 
     def logout_user(self):
         """Logs out user, including destroying cookies and removing user from loaded accounts"""
-        # Reset session key
+        user = self.current_user()
+
+        # Check if we need logouting
+        if user is None: return False
+
+        # Reset cookies
+        cherrypy.response.cookie["user"] = ""
+        cherrypy.response.cookie["user"]["path"] = "/"
+        cherrypy.response.cookie["user"]["max-age"] = 0
         cherrypy.response.cookie["session"] = ""
         cherrypy.response.cookie["session"]["path"] = "/"
         cherrypy.response.cookie["session"]["max-age"] = 0
-        # Remove user from list, if user cookie exist
-        user = cherrypy.request.cookie.get("user")
-        if user:
-            account = self.get_user(user.value)
-            if account is not None:
-                account.session = ""
-                account.commit()
-                self.accounts.remove(account)
-                logging.info("User {} ({}) logged out".format(account.user, self.core.get_client_ip()))
-                return True
-        return False
 
-    def protect(self):
-        """Use this function, when you want users to log in before accessing page"""
-        account = self.verify_user()
-        if not account:
-            raise cherrypy.HTTPRedirect("/settings/login")
-        return account
+        # Reset session key in database and remove from list
+        user.session = ""
+        user.commit()
+        self.accounts.remove(user)
 
-    def verify_user(self):
-        """Check user session. First search for cookies, and then chceck if they care containing valid information. returns Account when succeed, None otherwise"""
-        user = cherrypy.request.cookie.get("user")
-        session = cherrypy.request.cookie.get("session")
-        # Check if cookies exist
-        if user and session:
-            # Check if user exist and his session
-            account = self.get_user(user=user.value)
-            if account:
-                if account.session == session.value:
-                    # Everything ok, return
-                    return account
-                else:
-                    # Session key is not correct, logout
-                    self.logout_user()
-                    logging.warning("User {} ({}) is logged in, but cookie contains wrong token".format(account.user, self.core.get_client_ip()))
-                    return None
-        return None
+        # Logouted
+        logging.info("User {} ({}) logged out".format(user.user, self.core.get_client_ip()))
+        return True
+        # Reset session key
