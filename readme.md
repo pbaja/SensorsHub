@@ -39,19 +39,20 @@ If you want to change directory/rename it after installation, just rerun install
 (l) - Low priority  
 (f) - Future function, we need to implement some others first  
   
- - [ ] (h) PIN protected home page  
- - [ ] (h) Better auto update function from website
- - [ ] (m) Basic triggers (for e.g. Send email when temperature is greater than x)
- - [ ] (m) Multiple field types: bool, int, float, percent  
- - [ ] (m) Sending data to sensors (via sockets or ajax)  
- - [ ] (m) Multiple accounts with permissions  
- - [ ] (m) Language selection for guests
- - [ ] (l) Better and more documentation
- - [ ] (l) Allow guests to change theme to dark/light  
- - [ ] (l) Comparing data for multiple periods from multiple fields  
- - [ ] (l) More API functions for developers (Getting data from database, modifying)  
- - [ ] (f) Advanced Triggers (for e.g. close window, when temperature inside is lower than outside)
- - [ ] (f) Plugins system
+ - [ ] -h- Multiple field types: bool, int, float, percent  
+ - [ ] -h- Better auto update function from website
+ - [ ] -m- Basic triggers (for e.g. Send email when temperature is greater than x)
+ - [ ] -m- Sending data to sensors (via sockets or ajax)  
+ - [ ] -m- Multiple accounts with permissions  
+ - [ ] -m- Language selection for guests
+ - [ ] -l- More options for home charts
+ - [ ] -l- Better and more documentation
+ - [ ] -l- Allow guests to change theme to dark/light  
+ - [ ] -l- PIN protected home page  
+ - [ ] -l- Comparing data for multiple periods from multiple fields  
+ - [ ] -l- More API functions for developers (Getting data from database, modifying)  
+ - [ ] -f- Advanced Triggers (for e.g. close window, when temperature inside is lower than outside)
+ - [ ] -f- Plugins system
  - [x] Multiple languages support
  - [x] Update home page field values with javascript  
  - [x] Make pairing with sensors more easly
