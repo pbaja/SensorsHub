@@ -2,7 +2,7 @@
 # SensorsHub  
 **Documentation: [Wiki page](https://github.com/SkewPL/SensorsHub/wiki)**  
 **Changelog: [Here](https://github.com/SkewPL/SensorsHub/blob/master/changelog.md)**  
-**Live demo: [Here](http://sensors.skew.tk)**
+**Live demo: [Here](http://akwaria.ml)** (Polish language)
   
 ## Features  
  - Light/Dark theme  
