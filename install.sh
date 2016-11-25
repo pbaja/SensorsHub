@@ -34,15 +34,59 @@ fi
 # Install dependencies
 echo "-> Installing dependencies"
 
-apt-get install python3 python3-pip > /dev/null
+echo "--> Installing python3"
+apt-get install python3 -y > /dev/null
 if [ $? -ne 0 ]; then
-    echo "-> There was a problem with installing dependencies. apt-get command failed. Aborting."
+    echo "--> Error occured, failed to install python3. Aborting."
     exit 1
 fi
 
-pip3 install cherrypy passlib markdown2 > /dev/null
+echo "--> Installing python3-pil"
+apt-get install python3-pil -y > /dev/null
 if [ $? -ne 0 ]; then
-    echo "-> There was a problem with installing dependencies: pip3 command failed. Aborting."
+    echo "--> Error occured, failed to install python3-pil. Aborting."
+    exit 1
+fi
+
+echo "--> Installing python3-pip"
+apt-get install python3 -y > /dev/null
+if [ $? -ne 0 ]; then
+    echo "--> Error occured, failed to install python3-pip. Aborting."
+    exit 1
+fi
+
+echo "--> Installing cherrypy"
+pip3 install cherrypy > /dev/null
+if [ $? -ne 0 ]; then
+    echo "--> Error occured, failed to install cherrypy. Aborting."
+    exit 1
+fi
+
+echo "--> Installing passlib"
+pip3 install passlib > /dev/null
+if [ $? -ne 0 ]; then
+    echo "--> Error occured, failed to install passlib. Aborting."
+    exit 1
+fi
+
+echo "--> Installing markdown2"
+pip3 install cherrypy > /dev/null
+if [ $? -ne 0 ]; then
+    echo "--> Error occured, failed to install markdown2. Aborting."
+    exit 1
+fi
+
+echo "--> Installing jinja2"
+pip3 install jinja2 > /dev/null
+if [ $? -ne 0 ]; then
+    echo "--> Error occured, failed to install jinja2. Aborting."
+    exit 1
+fi
+
+echo "--> Installing psutil"
+pip3 install jinja2 > /dev/null
+if [ $? -ne 0 ]; then
+    echo "--> Error occured, failed to install psutil. Aborting."
     exit 1
 fi
 
@@ -88,15 +132,6 @@ rm "LICENCE.md" 2> /dev/null
 rm "README.md" 2> /dev/null
 rm "CHANGELOG.md" 2> /dev/null
 rm "version.json" 2> /dev/null
-
-# Just for statistics, generate unique machine id and send it to server
-# There is no sensitive data at all :)
-PROCESSOR_ID=$(dmidecode -t 4 | grep ID | sed 's/.*ID://;s/ //g')
-NETWORK_MAC=$(ifconfig | grep eth0 | awk '{print $NF}' | sed 's/://g')
-MACHINEID=$(echo $PROCESSOR_ID$NETWORK_MAC | sha256sum | awk '{print $1}')
-
-echo "$MACHINEID" > "machineid.txt"
-wget "http://skew.tk/sensorshub?machineid="$MACHINEID"&status=0" -O /dev/null &>/dev/null
 
 # Done!
 echo "-> Installed successfully. SensorsHub will automatically start at system boot, and restart when crashed. Neat!"
